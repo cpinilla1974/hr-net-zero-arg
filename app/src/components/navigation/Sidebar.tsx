@@ -13,6 +13,14 @@ import {
   Leaf,
 } from "lucide-react";
 
+const partnerLogos = [
+  { name: "UNIDO", src: "/logos/unido.png" },
+  { name: "Net Zero Partnership", src: "/logos/net-zero-partnership.png" },
+  { name: "GCCA", src: "/logos/gcca.png" },
+  { name: "FICEM", src: "/logos/ficem.png" },
+  { name: "AFCP", src: "/logos/afcp.png" },
+];
+
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -61,6 +69,27 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
+
+      {/* Logos de socios */}
+      <div className="border-t border-white/10 px-4 py-4">
+        <p className="text-[10px] text-white/50 uppercase tracking-wider mb-3">Con el apoyo de</p>
+        <div className="grid grid-cols-2 gap-2">
+          {partnerLogos.map((logo) => (
+            <div
+              key={logo.name}
+              className="bg-white rounded p-2 flex items-center justify-center"
+              title={logo.name}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logo.src}
+                alt={logo.name}
+                className="h-6 w-auto object-contain"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Footer del sidebar */}
       <div className="border-t border-white/10 p-3">
