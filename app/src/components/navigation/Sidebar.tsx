@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   LayoutDashboard,
@@ -11,7 +12,12 @@ import {
   Settings,
   LogOut,
   Leaf,
+  User,
+  ChevronDown,
+  Shield,
+  LogIn,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const partnerLogos = [
   { name: "UNIDO", src: "/logos/unido.png" },
@@ -22,15 +28,33 @@ const partnerLogos = [
 ];
 
 const navItems = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/hoja-de-ruta", label: "Hoja de Ruta", icon: Map },
-  { href: "/calculadora", label: "Calculadora", icon: Calculator },
-  { href: "/sobre", label: "Sobre", icon: Info },
+  { href: "/", label: "Home", icon: Home, requiresAuth: false },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresAuth: false },
+  { href: "/hoja-de-ruta", label: "Hoja de Ruta", icon: Map, requiresAuth: false },
+  { href: "/calculadora", label: "Calculadora", icon: Calculator, requiresAuth: true },
+  { href: "/sobre", label: "Sobre", icon: Info, requiresAuth: false },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    router.push("/");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <aside className="sidebar hidden lg:flex flex-col bg-[#1B3A5F]">
@@ -50,6 +74,21 @@ export function Sidebar() {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
+            const isDisabled = item.requiresAuth && !isAuthenticated;
+
+            if (isDisabled) {
+              return (
+                <li key={item.href}>
+                  <div
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/30 cursor-not-allowed"
+                    title="Requiere iniciar sesión"
+                  >
+                    <Icon className="h-5 w-5" />
+                    {item.label}
+                  </div>
+                </li>
+              );
+            }
 
             return (
               <li key={item.href}>
@@ -68,6 +107,23 @@ export function Sidebar() {
             );
           })}
         </ul>
+
+        {/* Admin link */}
+        {isAdmin && (
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <Link
+              href="/admin"
+              className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                pathname === "/admin"
+                  ? "bg-[#5B9BD5] text-white"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Shield className="h-5 w-5" />
+              Administración
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Logos de socios */}
@@ -91,22 +147,63 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Footer del sidebar */}
+      {/* Footer del sidebar - User area */}
       <div className="border-t border-white/10 p-3">
-        <ul className="space-y-1">
-          <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
-              <Settings className="h-5 w-5" />
-              Configuración
+        {isAuthenticated && user ? (
+          <div className="relative">
+            {/* User button */}
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#5B9BD5] text-white text-xs font-semibold">
+                {getInitials(user.name)}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <p className="text-xs text-white/50 capitalize">{user.role === "admin" ? "Administrador" : "Miembro"}</p>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-white/50 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
             </button>
-          </li>
-          <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
-              <LogOut className="h-5 w-5" />
-              Cerrar Sesión
-            </button>
-          </li>
-        </ul>
+
+            {/* Dropdown menu */}
+            {userMenuOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-1 bg-[#2E5A8B] rounded-lg shadow-lg overflow-hidden">
+                <Link
+                  href="/perfil"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  Mi Perfil
+                </Link>
+                <Link
+                  href="/configuracion"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Configuración
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-300 hover:bg-white/10 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Cerrar Sesión
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <LogIn className="h-5 w-5" />
+            Iniciar Sesión
+          </Link>
+        )}
       </div>
     </aside>
   );

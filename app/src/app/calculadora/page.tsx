@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { RotateCcw, XCircle, CheckCircle } from "lucide-react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 // Factores de emisión (simplificados)
 const FACTOR_CALCINACION = 525; // kgCO2/tClinker
 const FACTOR_GAS_NATURAL = 56.1; // kgCO2/GJ
 const FACTOR_PETCOKE = 97.5; // kgCO2/GJ
 
-export default function CalculadoraPage() {
+function CalculadoraContent() {
   // Estados para inputs
   const [produccionCemento, setProduccionCemento] = useState(15.8); // Mt
   const [factorClinker, setFactorClinker] = useState(65); // %
@@ -286,5 +287,13 @@ function SliderInput({
         className="w-full h-2 bg-[var(--gray-light)] rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
       />
     </div>
+  );
+}
+
+export default function CalculadoraPage() {
+  return (
+    <ProtectedRoute requiredRole="member">
+      <CalculadoraContent />
+    </ProtectedRoute>
   );
 }
