@@ -1,70 +1,80 @@
 "use client";
 
 import {
-  LineChart,
+  AreaChart,
+  Area,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
   ReferenceLine,
 } from "recharts";
 import { escenarioBAU } from "@/lib/data";
 
 export function TrayectoriaChart() {
   return (
-    <div className="h-64 w-full">
+    <div className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={escenarioBAU} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+        <AreaChart data={escenarioBAU} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorTrayectoria" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#5B9BD5" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#5B9BD5" stopOpacity={0.05}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
             dataKey="año"
-            stroke="rgba(255,255,255,0.6)"
-            tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }}
+            stroke="#6B7280"
+            tick={{ fill: "#6B7280", fontSize: 12 }}
+            axisLine={{ stroke: "#E5E7EB" }}
           />
           <YAxis
-            stroke="rgba(255,255,255,0.6)"
-            tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }}
+            stroke="#6B7280"
+            tick={{ fill: "#6B7280", fontSize: 12 }}
+            axisLine={{ stroke: "#E5E7EB" }}
             label={{
-              value: "MtCO₂",
+              value: "kgCO₂-eq/t cemento",
               angle: -90,
               position: "insideLeft",
-              fill: "rgba(255,255,255,0.6)",
+              fill: "#6B7280",
               fontSize: 12,
+              offset: 10,
             }}
+            domain={[0, 700]}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#102215",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #E5E7EB",
               borderRadius: "8px",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
             }}
-            labelStyle={{ color: "white" }}
+            labelStyle={{ color: "#1B3A5F", fontWeight: 600 }}
+            itemStyle={{ color: "#6B7280" }}
           />
-          <Legend
-            wrapperStyle={{ paddingTop: "10px" }}
-            formatter={(value) => <span style={{ color: "rgba(255,255,255,0.8)" }}>{value}</span>}
-          />
-          <ReferenceLine y={0} stroke="rgba(19, 236, 73, 0.5)" strokeDasharray="5 5" />
-          <Line
-            type="monotone"
-            dataKey="bau"
-            name="Business as Usual"
-            stroke="#7D8A81"
-            strokeWidth={2}
-            dot={{ fill: "#7D8A81", strokeWidth: 2 }}
-          />
-          <Line
+          <ReferenceLine y={0} stroke="#10B981" strokeWidth={2} />
+          <Area
             type="monotone"
             dataKey="trayectoria"
             name="Trayectoria Net Zero"
-            stroke="#13ec49"
-            strokeWidth={3}
-            dot={{ fill: "#13ec49", strokeWidth: 2 }}
+            stroke="#5B9BD5"
+            strokeWidth={2}
+            fillOpacity={1}
+            fill="url(#colorTrayectoria)"
           />
-        </LineChart>
+          <Line
+            type="monotone"
+            dataKey="bau"
+            name="BAU (Business as Usual)"
+            stroke="#9CA3AF"
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            dot={false}
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

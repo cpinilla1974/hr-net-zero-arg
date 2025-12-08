@@ -1,33 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark theme - nueva identidad visual */
-  --background: #102218;
-  --background-secondary: #1a2e1a;
-  --background-card: rgba(255, 255, 255, 0.05);
-  --foreground: #ffffff;
-  --foreground-muted: rgba(255, 255, 255, 0.6);
+  /* Light theme - Identidad Hoja de Ruta Net Zero */
+  --background: #FFFFFF;
+  --background-secondary: #F5F8FA;
+  --background-card: #FFFFFF;
+  --foreground: #1B3A5F;
+  --foreground-muted: #6B7280;
 
-  /* Nueva paleta de colores */
-  --primary: #11d462;
-  --primary-light: #20C997;
-  --primary-muted: rgba(40, 167, 69, 0.2);
-  --accent: #007BFF;
-  --border: rgba(255, 255, 255, 0.1);
+  /* Paleta corporativa - Azules */
+  --primary: #1B3A5F;
+  --primary-light: #2E5A8B;
+  --primary-muted: rgba(27, 58, 95, 0.1);
+  --accent: #5B9BD5;
+  --accent-light: #A8D1E8;
+  --border: #E5E7EB;
+
+  /* Verde para progreso/positivo */
+  --green: #10B981;
+  --green-light: #D1FAE5;
+  --green-dark: #059669;
 
   /* Grises */
-  --gray-dark: #343A40;
-  --gray-medium: #6C757D;
-  --gray-light: #F8F9FA;
+  --gray-dark: #374151;
+  --gray-medium: #6B7280;
+  --gray-light: #F3F4F6;
 
   /* Semantic colors */
-  --success: #28A745;
-  --warning: #FFC107;
-  --error: #DC3545;
-  --info: #007BFF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
 
   /* Sidebar */
-  --sidebar-width: 260px;
+  --sidebar-width: 240px;
+  --sidebar-bg: #1B3A5F;
 }
 
 @theme inline {
@@ -39,7 +46,12 @@
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
   --color-primary-muted: var(--primary-muted);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
   --color-border: var(--border);
+  --color-sidebar-bg: var(--sidebar-bg);
   --font-display: var(--font-public-sans);
 }
 
@@ -60,16 +72,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: var(--background-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-muted);
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: var(--gray-medium);
 }
 
 /* Sidebar layout for desktop */
@@ -84,12 +96,48 @@ body {
     top: 0;
     left: 0;
     height: 100vh;
-    background: var(--background-secondary);
-    border-right: 1px solid var(--border);
+    background: var(--sidebar-bg);
+    border-right: none;
   }
 
   .main-content {
     margin-left: var(--sidebar-width);
     flex: 1;
+    background: var(--background-secondary);
+    min-height: 100vh;
   }
+}
+
+/* Card styles */
+.card {
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* KPI Card specific */
+.kpi-card {
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* Progress bar */
+.progress-bar {
+  background: var(--gray-light);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: var(--accent);
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-fill.green {
+  background: var(--green);
 }

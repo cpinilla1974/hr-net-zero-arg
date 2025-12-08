@@ -1,101 +1,204 @@
-import { ProgressRing } from "@/components/ui/ProgressRing";
-import { EjeCard } from "@/components/ui/EjeCard";
 import { ejesDescarbonizacion } from "@/lib/data";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+
+const grupos = [
+  { id: "A", nombre: "Grupo A: Diseño y Construcción", aporte: 18, ejes: ["E01", "E02"] },
+  { id: "B", nombre: "Grupo B: Clínker y Coprocesamiento", aporte: 19, ejes: ["E03", "E06"] },
+  { id: "C", nombre: "Grupo C: CCUS", aporte: 45, ejes: ["E09"] },
+  { id: "D", nombre: "Grupo D: Electricidad", aporte: 5, ejes: ["E10"] },
+  { id: "E", nombre: "Grupo E: Recarbonatación", aporte: 13, ejes: ["E11"] },
+];
+
+const contribuciones = [
+  { grupo: "Grupo A: Diseño y Construcción", porcentaje: 18 },
+  { grupo: "Grupo B: Clínker y Coprocesamiento", porcentaje: 19 },
+  { grupo: "Grupo C: Capturas Tecnológicas CCUS", porcentaje: 45 },
+  { grupo: "Grupo D: Electricidad Baja en Carbono", porcentaje: 5 },
+  { grupo: "Grupo E: Recarbonatación", porcentaje: 13 },
+];
 
 export default function HojaDeRutaPage() {
-  // Calcular progreso total (suma de aportes de todos los ejes que ya están en progreso)
-  const progresoActual = 17; // Aproximado basado en avances actuales
+  const progresoActual = 17;
 
   return (
-    <main className="flex-1">
+    <main className="flex-1 bg-[var(--background-secondary)] min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/80 p-4 backdrop-blur-sm">
-        <Link href="/" className="flex h-10 w-10 items-center justify-center text-[var(--foreground-muted)]">
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <h1 className="flex-1 text-center text-lg font-bold tracking-tight">
-          Hoja de Ruta Net Zero 2050
+      <div className="bg-white px-6 py-8 lg:px-8">
+        <h1 className="text-3xl font-bold text-[var(--primary)] tracking-tight">
+          Net Zero 2050 - Cemento Argentino
         </h1>
-        <div className="h-10 w-10" />
-      </header>
+        <p className="mt-1 text-[var(--foreground-muted)]">
+          Monitoreo y simulación de la hoja de ruta para la descarbonización del sector.
+        </p>
+      </div>
 
-      <div className="px-4 py-6">
-        {/* Hero Section */}
-        <section className="mb-6 flex flex-col items-center text-center">
-          <ProgressRing progress={progresoActual} sublabel="Completado" />
-          <h2 className="mt-4 text-3xl font-bold tracking-tight">Camino al 100%</h2>
-          <p className="mt-2 max-w-sm text-base text-[var(--foreground-muted)]">
-            Detalle de los 11 ejes de descarbonización con sus respectivas contribuciones porcentuales.
-          </p>
-        </section>
+      <div className="px-6 py-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Columna principal - Ejes */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Grupo A */}
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--primary)] mb-4">
+                  Grupo A: Diseño y Construcción <span className="text-[var(--accent)]">18%</span>
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <EjeCardSimple
+                    codigo="Eje 01"
+                    nombre="Diseño y Construcción"
+                    descripcion="Innovaciones en el diseño de mezclas y procesos constructivos."
+                    aporte={8}
+                  />
+                  <EjeCardSimple
+                    codigo="Eje 02"
+                    nombre="Eficiencia Producción Hormigón"
+                    descripcion="Optimización en la producción para reducir el consumo energético."
+                    aporte={10}
+                  />
+                </div>
+              </div>
 
-        {/* Grupos de Ejes */}
-        <section className="mb-6">
-          <div className="mb-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-[var(--primary-muted)] px-3 py-1 text-xs font-medium text-[var(--primary)]">
-              Grupo A: Diseño y Hormigón (18%)
-            </span>
-            <span className="rounded-full bg-[var(--primary-muted)] px-3 py-1 text-xs font-medium text-[var(--primary)]">
-              Grupo B: Producción (19%)
-            </span>
-            <span className="rounded-full bg-[var(--primary-muted)] px-3 py-1 text-xs font-medium text-[var(--primary)]">
-              Grupo C: CCUS (45%)
-            </span>
-          </div>
-        </section>
+              {/* Grupo B */}
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--primary)] mb-4">
+                  Grupo B: Clínker y Coprocesamiento <span className="text-[var(--accent)]">19%</span>
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <EjeCardSimple
+                    codigo="Eje 03"
+                    nombre="Cemento y Adiciones"
+                    descripcion="Uso de adiciones cementicias suplementarias para reducir el factor clínker."
+                    aporte={12}
+                  />
+                  <EjeCardSimple
+                    codigo="Eje 06"
+                    nombre="Coprocesamiento"
+                    descripcion="Aprovechamiento de residuos como combustible y materia prima."
+                    aporte={7}
+                  />
+                </div>
+              </div>
 
-        {/* Lista de Ejes */}
-        <div className="flex flex-col gap-4">
-          {ejesDescarbonizacion.map((eje) => (
-            <EjeCard
-              key={eje.id}
-              codigo={eje.codigo}
-              nombre={eje.nombre}
-              aporte={eje.aporte}
-              descripcion={eje.descripcion}
-              icon={eje.icon}
-              indicador={eje.indicador}
-              valorActual={eje.valorActual}
-              meta2050={eje.meta2050}
-            />
-          ))}
-        </div>
+              {/* Grupos C, D, E */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Grupo C */}
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
+                    Grupo C: CCUS <span className="text-[var(--accent)]">45%</span>
+                  </h3>
+                  <EjeCardSimple
+                    codigo="Eje 09"
+                    nombre="Capturas Tecnológicas"
+                    descripcion="Implementación de tecnologías de captura y almacenamiento de carbono."
+                    aporte={45}
+                  />
+                </div>
 
-        {/* Resumen */}
-        <section className="mt-8 rounded-xl border border-[var(--border)] bg-[var(--background-card)] p-4">
-          <h3 className="mb-4 text-lg font-bold">Resumen de Contribuciones</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--foreground-muted)]">Diseño y Construcción (A)</span>
-              <span className="font-bold text-[var(--primary)]">18%</span>
+                {/* Grupo D */}
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
+                    Grupo D: Electricidad <span className="text-[var(--accent)]">5%</span>
+                  </h3>
+                  <EjeCardSimple
+                    codigo="Eje 10"
+                    nombre="Consumo Eléctrico"
+                    descripcion="Transición a fuentes de energía renovable para el consumo eléctrico."
+                    aporte={5}
+                  />
+                </div>
+
+                {/* Grupo E */}
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
+                    Grupo E: Recarbonatación <span className="text-[var(--accent)]">13%</span>
+                  </h3>
+                  <EjeCardSimple
+                    codigo="Eje 11"
+                    nombre="Recarbonatación"
+                    descripcion="Absorción natural de CO2 por el hormigón a lo largo de su vida útil."
+                    aporte={13}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--foreground-muted)]">Producción y Combustibles (B)</span>
-              <span className="font-bold text-[var(--primary)]">19%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--foreground-muted)]">Captura de Carbono (C)</span>
-              <span className="font-bold text-[var(--primary)]">45%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--foreground-muted)]">Electricidad (D)</span>
-              <span className="font-bold text-[var(--primary)]">5%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--foreground-muted)]">Recarbonatación (E)</span>
-              <span className="font-bold text-[var(--primary)]">13%</span>
-            </div>
-            <div className="mt-2 border-t border-[var(--border)] pt-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold">Total</span>
-                <span className="text-xl font-bold text-[var(--primary)]">100%</span>
+
+            {/* Columna lateral - Progreso y Resumen */}
+            <div className="space-y-6">
+              {/* Progress Ring */}
+              <div className="bg-white rounded-xl border border-[var(--border)] p-6 text-center">
+                <h3 className="text-lg font-semibold text-[var(--primary)] mb-4">Progreso Total</h3>
+                <div className="relative w-40 h-40 mx-auto mb-4">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="8"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      strokeDasharray={`${progresoActual * 2.51} 251`}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-[var(--success)]">{progresoActual}%</span>
+                  </div>
+                </div>
+                <p className="text-sm text-[var(--foreground-muted)]">Completado</p>
+              </div>
+
+              {/* Contribución por Grupo */}
+              <div className="bg-white rounded-xl border border-[var(--border)] p-6">
+                <h3 className="text-base font-semibold text-[var(--primary)] mb-4">Contribución por Grupo</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                    <span className="text-sm font-medium text-[var(--primary)]">Contribución por Grupo</span>
+                    <span className="text-sm font-medium text-[var(--primary)]">%</span>
+                  </div>
+                  {contribuciones.map((item) => (
+                    <div key={item.grupo} className="flex items-center justify-between py-1">
+                      <span className="text-sm text-[var(--foreground-muted)]">{item.grupo}</span>
+                      <span className="text-sm font-semibold text-[var(--foreground)]">{item.porcentaje}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
+  );
+}
+
+function EjeCardSimple({
+  codigo,
+  nombre,
+  descripcion,
+  aporte,
+}: {
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  aporte: number;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-[var(--border)] p-5 hover:border-[var(--accent)] transition-colors">
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 rounded">
+          {codigo}
+        </span>
+      </div>
+      <h4 className="font-semibold text-[var(--primary)] mb-2">{nombre}</h4>
+      <p className="text-sm text-[var(--foreground-muted)] mb-3">{descripcion}</p>
+      <p className="text-2xl font-bold text-[var(--accent)]">{aporte}%</p>
+    </div>
   );
 }

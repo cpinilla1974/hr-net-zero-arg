@@ -3,43 +3,42 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Home,
   LayoutDashboard,
+  Map,
   Calculator,
-  LineChart,
-  FileText,
+  Info,
   Settings,
   LogOut,
   Leaf,
 } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/hoja-de-ruta", label: "Hoja de Ruta", icon: Map },
   { href: "/calculadora", label: "Calculadora", icon: Calculator },
-  { href: "/hoja-de-ruta", label: "Escenarios", icon: LineChart },
-  { href: "/sobre", label: "Reportes", icon: FileText },
+  { href: "/sobre", label: "Sobre", icon: Info },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sidebar hidden lg:flex flex-col">
+    <aside className="sidebar hidden lg:flex flex-col bg-[#1B3A5F]">
       {/* Logo */}
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primary)]">
-            <Leaf className="h-6 w-6 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#5B9BD5]">
+            <Leaf className="h-5 w-5 text-white" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-bold leading-tight">Hoja de Ruta</span>
-            <span className="text-sm text-[var(--foreground-muted)]">Net Zero</span>
-          </div>
+          <span className="text-lg font-bold text-white">Net Zero 2050</span>
         </Link>
       </div>
 
       {/* Navegación principal */}
-      <nav className="flex-1 px-4 py-6">
-        <ul className="space-y-2">
+      <nav className="flex-1 px-3 py-4">
+        <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -50,8 +49,8 @@ export function Sidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-[var(--primary)] text-white"
-                      : "text-[var(--foreground-muted)] hover:bg-[var(--background-card)] hover:text-white"
+                      ? "bg-[#5B9BD5] text-white"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -64,16 +63,16 @@ export function Sidebar() {
       </nav>
 
       {/* Footer del sidebar */}
-      <div className="border-t border-[var(--border)] p-4">
-        <ul className="space-y-2">
+      <div className="border-t border-white/10 p-3">
+        <ul className="space-y-1">
           <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-card)] hover:text-white">
+            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
               <Settings className="h-5 w-5" />
-              Ajustes
+              Configuración
             </button>
           </li>
           <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-card)] hover:text-white">
+            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white">
               <LogOut className="h-5 w-5" />
               Cerrar Sesión
             </button>
