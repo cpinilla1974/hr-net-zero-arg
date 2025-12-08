@@ -1,8 +1,10 @@
 # Archivos pesados
 *.pdf
 docs/source/images/
+docs/source/pdf_to_images.py
 docs/design/mockups/
 docs/design/mockups_desktop/
+docs/design/mockups_desktop_color/
 
 # Dependencias
 node_modules/
