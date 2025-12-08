@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+:root {
+  /* Dark theme - nueva identidad visual */
+  --background: #102218;
+  --background-secondary: #1a2e1a;
+  --background-card: rgba(255, 255, 255, 0.05);
+  --foreground: #ffffff;
+  --foreground-muted: rgba(255, 255, 255, 0.6);
+
+  /* Nueva paleta de colores */
+  --primary: #11d462;
+  --primary-light: #20C997;
+  --primary-muted: rgba(40, 167, 69, 0.2);
+  --accent: #007BFF;
+  --border: rgba(255, 255, 255, 0.1);
+
+  /* Grises */
+  --gray-dark: #343A40;
+  --gray-medium: #6C757D;
+  --gray-light: #F8F9FA;
+
+  /* Semantic colors */
+  --success: #28A745;
+  --warning: #FFC107;
+  --error: #DC3545;
+  --info: #007BFF;
+
+  /* Sidebar */
+  --sidebar-width: 260px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-card: var(--background-card);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-muted: var(--primary-muted);
+  --color-border: var(--border);
+  --font-display: var(--font-public-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-display), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Sidebar layout for desktop */
+@media (min-width: 1024px) {
+  .layout-with-sidebar {
+    display: flex;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: var(--background-secondary);
+    border-right: 1px solid var(--border);
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+  }
+}
