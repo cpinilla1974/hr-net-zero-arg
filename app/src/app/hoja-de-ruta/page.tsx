@@ -1,20 +1,10 @@
-import { ejesDescarbonizacion } from "@/lib/data";
+import { ejesDescarbonizacion, gruposDescarbonizacion } from "@/lib/data";
 
-const grupos = [
-  { id: "A", nombre: "Grupo A: Diseño y Construcción", aporte: 18, ejes: ["E01", "E02"] },
-  { id: "B", nombre: "Grupo B: Clínker y Coprocesamiento", aporte: 19, ejes: ["E03", "E06"] },
-  { id: "C", nombre: "Grupo C: CCUS", aporte: 45, ejes: ["E09"] },
-  { id: "D", nombre: "Grupo D: Electricidad", aporte: 5, ejes: ["E10"] },
-  { id: "E", nombre: "Grupo E: Recarbonatación", aporte: 13, ejes: ["E11"] },
-];
-
-const contribuciones = [
-  { grupo: "Grupo A: Diseño y Construcción", porcentaje: 18 },
-  { grupo: "Grupo B: Clínker y Coprocesamiento", porcentaje: 19 },
-  { grupo: "Grupo C: Capturas Tecnológicas CCUS", porcentaje: 45 },
-  { grupo: "Grupo D: Electricidad Baja en Carbono", porcentaje: 5 },
-  { grupo: "Grupo E: Recarbonatación", porcentaje: 13 },
-];
+// Agrupar ejes por grupo
+const ejesPorGrupo = gruposDescarbonizacion.map((grupo) => ({
+  ...grupo,
+  ejesData: ejesDescarbonizacion.filter((eje) => eje.grupo === grupo.grupo),
+}));
 
 export default function HojaDeRutaPage() {
   const progresoActual = 17;
@@ -24,110 +14,56 @@ export default function HojaDeRutaPage() {
       {/* Header */}
       <div className="bg-white px-6 py-8 lg:px-8">
         <h1 className="text-3xl font-bold text-[var(--primary)] tracking-tight">
-          Net Zero 2050 - Cemento Argentino
+          Hoja de Ruta Net Zero 2050
         </h1>
         <p className="mt-1 text-[var(--foreground-muted)]">
-          Monitoreo y simulación de la hoja de ruta para la descarbonización del sector.
+          11 ejes de descarbonización del sector cementero argentino.
         </p>
       </div>
 
       <div className="px-6 py-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Columna principal - Ejes */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Grupo A */}
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--primary)] mb-4">
-                  Grupo A: Diseño y Construcción <span className="text-[var(--accent)]">18%</span>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <EjeCardSimple
-                    codigo="Eje 01"
-                    nombre="Diseño y Construcción"
-                    descripcion="Innovaciones en el diseño de mezclas y procesos constructivos."
-                    aporte={8}
-                  />
-                  <EjeCardSimple
-                    codigo="Eje 02"
-                    nombre="Eficiencia Producción Hormigón"
-                    descripcion="Optimización en la producción para reducir el consumo energético."
-                    aporte={10}
-                  />
+            {/* Columna principal - Ejes por Grupo */}
+            <div className="lg:col-span-2 space-y-8">
+              {ejesPorGrupo.map((grupo) => (
+                <div key={grupo.grupo}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: grupo.color }}
+                    />
+                    <h2 className="text-lg font-semibold text-[var(--primary)]">
+                      Grupo {grupo.grupo}: {grupo.nombre}
+                    </h2>
+                    <span
+                      className="text-lg font-bold"
+                      style={{ color: grupo.color }}
+                    >
+                      {grupo.aporte}%
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {grupo.ejesData.map((eje) => (
+                      <EjeCard key={eje.id} eje={eje} color={grupo.color} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              {/* Grupo B */}
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--primary)] mb-4">
-                  Grupo B: Clínker y Coprocesamiento <span className="text-[var(--accent)]">19%</span>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <EjeCardSimple
-                    codigo="Eje 03"
-                    nombre="Cemento y Adiciones"
-                    descripcion="Uso de adiciones cementicias suplementarias para reducir el factor clínker."
-                    aporte={12}
-                  />
-                  <EjeCardSimple
-                    codigo="Eje 06"
-                    nombre="Coprocesamiento"
-                    descripcion="Aprovechamiento de residuos como combustible y materia prima."
-                    aporte={7}
-                  />
-                </div>
-              </div>
-
-              {/* Grupos C, D, E */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Grupo C */}
-                <div>
-                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
-                    Grupo C: CCUS <span className="text-[var(--accent)]">45%</span>
-                  </h3>
-                  <EjeCardSimple
-                    codigo="Eje 09"
-                    nombre="Capturas Tecnológicas"
-                    descripcion="Implementación de tecnologías de captura y almacenamiento de carbono."
-                    aporte={45}
-                  />
-                </div>
-
-                {/* Grupo D */}
-                <div>
-                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
-                    Grupo D: Electricidad <span className="text-[var(--accent)]">5%</span>
-                  </h3>
-                  <EjeCardSimple
-                    codigo="Eje 10"
-                    nombre="Consumo Eléctrico"
-                    descripcion="Transición a fuentes de energía renovable para el consumo eléctrico."
-                    aporte={5}
-                  />
-                </div>
-
-                {/* Grupo E */}
-                <div>
-                  <h3 className="text-base font-semibold text-[var(--primary)] mb-3">
-                    Grupo E: Recarbonatación <span className="text-[var(--accent)]">13%</span>
-                  </h3>
-                  <EjeCardSimple
-                    codigo="Eje 11"
-                    nombre="Recarbonatación"
-                    descripcion="Absorción natural de CO2 por el hormigón a lo largo de su vida útil."
-                    aporte={13}
-                  />
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Columna lateral - Progreso y Resumen */}
             <div className="space-y-6">
               {/* Progress Ring */}
               <div className="bg-white rounded-xl border border-[var(--border)] p-6 text-center">
-                <h3 className="text-lg font-semibold text-[var(--primary)] mb-4">Progreso Total</h3>
+                <h3 className="text-lg font-semibold text-[var(--primary)] mb-4">
+                  Progreso Total
+                </h3>
                 <div className="relative w-40 h-40 mx-auto mb-4">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
                     <circle
                       cx="50"
                       cy="50"
@@ -148,26 +84,69 @@ export default function HojaDeRutaPage() {
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-[var(--success)]">{progresoActual}%</span>
+                    <span className="text-3xl font-bold text-[var(--success)]">
+                      {progresoActual}%
+                    </span>
                   </div>
                 </div>
-                <p className="text-sm text-[var(--foreground-muted)]">Completado</p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Reducción lograda desde 1990
+                </p>
               </div>
 
               {/* Contribución por Grupo */}
               <div className="bg-white rounded-xl border border-[var(--border)] p-6">
-                <h3 className="text-base font-semibold text-[var(--primary)] mb-4">Contribución por Grupo</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-[var(--border)]">
-                    <span className="text-sm font-medium text-[var(--primary)]">Contribución por Grupo</span>
-                    <span className="text-sm font-medium text-[var(--primary)]">%</span>
-                  </div>
-                  {contribuciones.map((item) => (
-                    <div key={item.grupo} className="flex items-center justify-between py-1">
-                      <span className="text-sm text-[var(--foreground-muted)]">{item.grupo}</span>
-                      <span className="text-sm font-semibold text-[var(--foreground)]">{item.porcentaje}%</span>
+                <h3 className="text-base font-semibold text-[var(--primary)] mb-4">
+                  Contribución al Net Zero
+                </h3>
+                <div className="space-y-4">
+                  {gruposDescarbonizacion.map((grupo) => (
+                    <div key={grupo.grupo}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm text-[var(--foreground-muted)]">
+                          {grupo.nombre}
+                        </span>
+                        <span
+                          className="text-sm font-bold"
+                          style={{ color: grupo.color }}
+                        >
+                          {grupo.aporte}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[var(--gray-light)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${grupo.aporte}%`,
+                            backgroundColor: grupo.color,
+                          }}
+                        />
+                      </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Resumen Total */}
+              <div className="bg-[var(--primary)] rounded-xl p-6 text-white">
+                <h3 className="text-lg font-semibold mb-4">Resumen</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Total Ejes</span>
+                    <span className="font-semibold">11</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Grupos</span>
+                    <span className="font-semibold">5</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Meta 2030</span>
+                    <span className="font-semibold">500 kgCO₂/t</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Meta 2050</span>
+                    <span className="font-semibold">Net Zero</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -178,27 +157,44 @@ export default function HojaDeRutaPage() {
   );
 }
 
-function EjeCardSimple({
-  codigo,
-  nombre,
-  descripcion,
-  aporte,
-}: {
+interface EjeData {
+  id: number;
   codigo: string;
   nombre: string;
   descripcion: string;
   aporte: number;
-}) {
+  indicador: string;
+  valorActual: string;
+  meta2050?: string;
+  meta2030?: string;
+}
+
+function EjeCard({ eje, color }: { eje: EjeData; color: string }) {
   return (
     <div className="bg-white rounded-xl border border-[var(--border)] p-5 hover:border-[var(--accent)] transition-colors">
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 rounded">
-          {codigo}
+        <span
+          className="text-xs font-semibold px-2 py-1 rounded"
+          style={{ backgroundColor: `${color}20`, color: color }}
+        >
+          {eje.codigo}
+        </span>
+        <span className="text-xl font-bold" style={{ color: color }}>
+          {eje.aporte}%
         </span>
       </div>
-      <h4 className="font-semibold text-[var(--primary)] mb-2">{nombre}</h4>
-      <p className="text-sm text-[var(--foreground-muted)] mb-3">{descripcion}</p>
-      <p className="text-2xl font-bold text-[var(--accent)]">{aporte}%</p>
+      <h4 className="font-semibold text-[var(--primary)] mb-2">{eje.nombre}</h4>
+      <p className="text-sm text-[var(--foreground-muted)] mb-3 line-clamp-2">
+        {eje.descripcion}
+      </p>
+      <div className="pt-3 border-t border-[var(--border)] text-xs">
+        <div className="flex justify-between text-[var(--foreground-muted)]">
+          <span>{eje.indicador}</span>
+          <span className="font-medium text-[var(--primary)]">
+            {eje.valorActual} → {eje.meta2050 || eje.meta2030}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

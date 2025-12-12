@@ -1,34 +1,32 @@
 "use client";
 
 import { ArrowUp, ArrowDown } from "lucide-react";
-import { kpiData } from "@/lib/data";
+import { kpiData, gruposDescarbonizacion, comparativaEmisiones } from "@/lib/data";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   ResponsiveContainer,
   Tooltip,
   CartesianGrid,
+  LineChart,
+  Line,
+  Legend,
 } from "recharts";
 
-const reduccionAnualData = [
-  { year: "2019", reduccion: 2.1 },
-  { year: "2020", reduccion: 3.2 },
-  { year: "2021", reduccion: 2.8 },
-  { year: "2022", reduccion: 4.1 },
-  { year: "2023", reduccion: 3.5 },
-];
-
-const ejesDescarbonizacion = [
-  { nombre: "Eficiencia Energética", progreso: 45 },
-  { nombre: "Sustitución de Combustibles", progreso: 28 },
-  { nombre: "Reducción Factor Clinker", progreso: 35 },
-  { nombre: "CCUS", progreso: 5 },
-];
+// Datos de evolución de emisiones históricas
+const evolucionEmisiones = comparativaEmisiones.map((d) => ({
+  año: d.año.toString(),
+  argentina: d.argentina,
+  lac: d.lac,
+  global: d.global,
+}));
 
 export default function DashboardPage() {
-  const progresoTotal = 17;
+  // Calcular progreso: desde 612 (1990) hasta 0 (2050), actualmente en 507
+  const emisionBase = 612;
+  const emisionActual = kpiData.emisionesEspecificas.actual;
+  const reduccionLograda = ((emisionBase - emisionActual) / emisionBase) * 100;
+  const progresoTotal = Math.round(reduccionLograda);
 
   return (
     <main className="flex-1 bg-[var(--background-secondary)] min-h-screen">
@@ -47,7 +45,12 @@ export default function DashboardPage() {
           {/* Progreso General */}
           <div className="bg-white rounded-xl border border-[var(--border)] p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[var(--primary)]">Progreso General Net Zero</h2>
+              <div>
+                <h2 className="text-base font-semibold text-[var(--primary)]">Progreso General Net Zero</h2>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Reducción desde línea base 1990 ({emisionBase} kgCO₂/t) hasta Net Zero
+                </p>
+              </div>
               <span className="text-2xl font-bold text-[var(--accent)]">{progresoTotal}%</span>
             </div>
             <div className="h-3 w-full rounded-full bg-[var(--gray-light)] overflow-hidden">
@@ -56,66 +59,82 @@ export default function DashboardPage() {
                 style={{ width: `${progresoTotal}%` }}
               />
             </div>
+            <div className="flex justify-between mt-2 text-xs text-[var(--foreground-muted)]">
+              <span>1990: {emisionBase}</span>
+              <span>Actual: {emisionActual}</span>
+              <span>Meta 2030: {kpiData.emisionesEspecificas.meta2030}</span>
+              <span>Meta 2050: Net Zero</span>
+            </div>
           </div>
 
           {/* KPIs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* KPI 1 */}
+            {/* KPI 1: Emisiones */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
-              <p className="text-sm text-[var(--foreground-muted)] mb-2">Emisiones CO2</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">520</p>
-              <p className="text-lg text-[var(--foreground-muted)]">kgCO2/t</p>
+              <p className="text-sm text-[var(--foreground-muted)] mb-2">Emisiones Netas</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.emisionesEspecificas.actual}</p>
+              <p className="text-lg text-[var(--foreground-muted)]">kgCO₂/t cemento</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowDown className="h-4 w-4 text-[var(--success)]" />
-                <span className="text-[var(--success)] text-sm font-medium">2.5% vs año anterior</span>
+                <span className="text-[var(--success)] text-sm font-medium">
+                  {kpiData.emisionesEspecificas.reduccionVs1990}% vs 1990
+                </span>
               </div>
             </div>
 
-            {/* KPI 2 */}
+            {/* KPI 2: Factor Clínker */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
-              <p className="text-sm text-[var(--foreground-muted)] mb-2">Factor Clinker</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">0.72</p>
+              <p className="text-sm text-[var(--foreground-muted)] mb-2">Factor Clínker</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.factorClinker.actual}%</p>
+              <p className="text-sm text-[var(--foreground-muted)]">Meta 2050: {kpiData.factorClinker.meta2050}%</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowDown className="h-4 w-4 text-[var(--success)]" />
-                <span className="text-[var(--success)] text-sm font-medium">1.8% vs año anterior</span>
+                <span className="text-[var(--success)] text-sm font-medium">
+                  vs global {kpiData.factorClinker.global}%
+                </span>
               </div>
             </div>
 
-            {/* KPI 3 */}
+            {/* KPI 3: Eficiencia Térmica */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
-              <p className="text-sm text-[var(--foreground-muted)] mb-2">Consumo Térmico</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">3.4</p>
-              <p className="text-lg text-[var(--foreground-muted)]">GJ/t</p>
+              <p className="text-sm text-[var(--foreground-muted)] mb-2">Eficiencia Térmica</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.eficienciaTermica.actual}</p>
+              <p className="text-lg text-[var(--foreground-muted)]">MJ/t clínker</p>
               <div className="flex items-center gap-1 mt-3">
-                <ArrowUp className="h-4 w-4 text-[var(--error)]" />
-                <span className="text-[var(--error)] text-sm font-medium">0.5% vs año anterior</span>
+                <ArrowDown className="h-4 w-4 text-[var(--success)]" />
+                <span className="text-[var(--success)] text-sm font-medium">
+                  vs global {kpiData.eficienciaTermica.global}
+                </span>
               </div>
             </div>
 
-            {/* KPI 4 */}
+            {/* KPI 4: Coprocesamiento */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
-              <p className="text-sm text-[var(--foreground-muted)] mb-2">Sustitución Comb.</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">15%</p>
+              <p className="text-sm text-[var(--foreground-muted)] mb-2">Coprocesamiento</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.coprocesamiento.actual}%</p>
+              <p className="text-sm text-[var(--foreground-muted)]">Meta 2050: {kpiData.coprocesamiento.meta2050}%</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowUp className="h-4 w-4 text-[var(--success)]" />
-                <span className="text-[var(--success)] text-sm font-medium">3.1% vs año anterior</span>
+                <span className="text-[var(--success)] text-sm font-medium">
+                  Meta 2030: {kpiData.coprocesamiento.meta2030}%
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Gráfico y Ejes */}
+          {/* Gráfico y Grupos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Gráfico de Barras */}
+            {/* Gráfico de Líneas - Comparativa Internacional */}
             <div className="lg:col-span-2 bg-white rounded-xl border border-[var(--border)] p-6">
               <h2 className="text-base font-semibold text-[var(--primary)] mb-6">
-                Reducción Anual de Emisiones (kt CO2)
+                Evolución Emisiones (kgCO₂/t cemento)
               </h2>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={reduccionAnualData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+                  <LineChart data={evolucionEmisiones} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis
-                      dataKey="year"
+                      dataKey="año"
                       axisLine={false}
                       tickLine={false}
                       tick={{ fill: "#6B7280", fontSize: 12 }}
@@ -124,6 +143,7 @@ export default function DashboardPage() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fill: "#6B7280", fontSize: 12 }}
+                      domain={[400, 800]}
                     />
                     <Tooltip
                       contentStyle={{
@@ -131,39 +151,93 @@ export default function DashboardPage() {
                         border: "1px solid #E5E7EB",
                         borderRadius: "8px",
                       }}
-                      formatter={(value: number) => [`${value}%`, "Reducción"]}
                     />
-                    <Bar
-                      dataKey="reduccion"
-                      fill="#5B9BD5"
-                      radius={[4, 4, 0, 0]}
-                      maxBarSize={50}
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="argentina"
+                      name="Argentina"
+                      stroke="#5B9BD5"
+                      strokeWidth={3}
+                      dot={{ fill: "#5B9BD5", strokeWidth: 2 }}
                     />
-                  </BarChart>
+                    <Line
+                      type="monotone"
+                      dataKey="lac"
+                      name="LAC"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      dot={{ fill: "#10B981", strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="global"
+                      name="Global"
+                      stroke="#9CA3AF"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      dot={{ fill: "#9CA3AF", strokeWidth: 2 }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Ejes de Descarbonización */}
+            {/* Grupos de Descarbonización */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-6">
               <h2 className="text-base font-semibold text-[var(--primary)] mb-6">
-                Ejes de Descarbonización
+                Contribución por Grupo
               </h2>
               <div className="space-y-5">
-                {ejesDescarbonizacion.map((eje) => (
-                  <div key={eje.nombre}>
+                {gruposDescarbonizacion.map((grupo) => (
+                  <div key={grupo.grupo}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-[var(--foreground-muted)]">{eje.nombre}</span>
-                      <span className="text-sm font-semibold text-[var(--accent)]">{eje.progreso}%</span>
+                      <span className="text-sm text-[var(--foreground-muted)]">{grupo.nombre}</span>
+                      <span className="text-sm font-semibold" style={{ color: grupo.color }}>
+                        {grupo.aporte}%
+                      </span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-[var(--gray-light)] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
-                        style={{ width: `${eje.progreso}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${grupo.aporte}%`, backgroundColor: grupo.color }}
                       />
                     </div>
                   </div>
                 ))}
+              </div>
+              <p className="text-xs text-[var(--foreground-muted)] mt-4">
+                Contribución de cada grupo al objetivo Net Zero 2050
+              </p>
+            </div>
+          </div>
+
+          {/* Resumen de Emisiones Totales */}
+          <div className="bg-white rounded-xl border border-[var(--border)] p-6">
+            <h2 className="text-base font-semibold text-[var(--primary)] mb-4">
+              Emisiones Totales del Sector
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-[var(--background-secondary)] rounded-lg">
+                <p className="text-sm text-[var(--foreground-muted)]">Directas</p>
+                <p className="text-2xl font-bold text-[var(--primary)]">{kpiData.emisionesTotales.directas}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">MtCO₂</p>
+              </div>
+              <div className="text-center p-4 bg-[var(--background-secondary)] rounded-lg">
+                <p className="text-sm text-[var(--foreground-muted)]">Indirectas</p>
+                <p className="text-2xl font-bold text-[var(--primary)]">{kpiData.emisionesTotales.indirectas}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">MtCO₂</p>
+              </div>
+              <div className="text-center p-4 bg-[var(--background-secondary)] rounded-lg">
+                <p className="text-sm text-[var(--foreground-muted)]">Total Actual</p>
+                <p className="text-2xl font-bold text-[var(--accent)]">{kpiData.emisionesTotales.actual}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">MtCO₂</p>
+              </div>
+              <div className="text-center p-4 bg-[var(--background-secondary)] rounded-lg">
+                <p className="text-sm text-[var(--foreground-muted)]">BAU 2050</p>
+                <p className="text-2xl font-bold text-[var(--error)]">{kpiData.emisionesTotales.bau2050}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">MtCO₂</p>
               </div>
             </div>
           </div>

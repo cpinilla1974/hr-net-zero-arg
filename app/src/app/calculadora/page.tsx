@@ -3,22 +3,35 @@
 import { useState, useMemo } from "react";
 import { RotateCcw, XCircle, CheckCircle } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { emisionesDetalladas, matrizCombustibles } from "@/lib/data";
 
-// Factores de emisión (simplificados)
-const FACTOR_CALCINACION = 525; // kgCO2/tClinker
+// Factores de emisión oficiales (fuente: GCCA/FICEM Argentina)
+const FACTOR_CALCINACION = emisionesDetalladas.calcinacion; // 525 kgCO2/tClinker
 const FACTOR_GAS_NATURAL = 56.1; // kgCO2/GJ
 const FACTOR_PETCOKE = 97.5; // kgCO2/GJ
 
+// Valores línea base 2020
+const LINEA_BASE = {
+  produccion: 12.55, // Mt cemento
+  factorClinker: 67, // %
+  eficienciaTermica: 3425, // MJ/tCk
+  gasNatural: matrizCombustibles.lineaBase.gasNatural, // 82%
+  petcoke: matrizCombustibles.lineaBase.petcoke, // 11%
+  biomasa: matrizCombustibles.lineaBase.biomasa, // 4%
+  hidrogeno: matrizCombustibles.lineaBase.hidrogeno, // 0%
+  cdrFosil: matrizCombustibles.lineaBase.cdrFosil, // 3%
+};
+
 function CalculadoraContent() {
-  // Estados para inputs
-  const [produccionCemento, setProduccionCemento] = useState(15.8); // Mt
-  const [factorClinker, setFactorClinker] = useState(65); // %
-  const [eficienciaTermica, setEficienciaTermica] = useState(3450); // MJ/tCk
-  const [gasNatural, setGasNatural] = useState(40); // %
-  const [petcoke, setPetcoke] = useState(30); // %
-  const [biomasa, setBiomasa] = useState(15); // %
-  const [hidrogeno, setHidrogeno] = useState(5); // %
-  const [cdrFosil, setCdrFosil] = useState(10); // %
+  // Estados para inputs (valores línea base 2020)
+  const [produccionCemento, setProduccionCemento] = useState(LINEA_BASE.produccion);
+  const [factorClinker, setFactorClinker] = useState(LINEA_BASE.factorClinker);
+  const [eficienciaTermica, setEficienciaTermica] = useState(LINEA_BASE.eficienciaTermica);
+  const [gasNatural, setGasNatural] = useState(LINEA_BASE.gasNatural);
+  const [petcoke, setPetcoke] = useState(LINEA_BASE.petcoke);
+  const [biomasa, setBiomasa] = useState(LINEA_BASE.biomasa);
+  const [hidrogeno, setHidrogeno] = useState(LINEA_BASE.hidrogeno);
+  const [cdrFosil, setCdrFosil] = useState(LINEA_BASE.cdrFosil);
 
   // Cálculos
   const resultados = useMemo(() => {
@@ -45,14 +58,14 @@ function CalculadoraContent() {
   const totalMatriz = gasNatural + petcoke + biomasa + hidrogeno + cdrFosil;
 
   const resetear = () => {
-    setProduccionCemento(15.8);
-    setFactorClinker(65);
-    setEficienciaTermica(3450);
-    setGasNatural(40);
-    setPetcoke(30);
-    setBiomasa(15);
-    setHidrogeno(5);
-    setCdrFosil(10);
+    setProduccionCemento(LINEA_BASE.produccion);
+    setFactorClinker(LINEA_BASE.factorClinker);
+    setEficienciaTermica(LINEA_BASE.eficienciaTermica);
+    setGasNatural(LINEA_BASE.gasNatural);
+    setPetcoke(LINEA_BASE.petcoke);
+    setBiomasa(LINEA_BASE.biomasa);
+    setHidrogeno(LINEA_BASE.hidrogeno);
+    setCdrFosil(LINEA_BASE.cdrFosil);
   };
 
   return (

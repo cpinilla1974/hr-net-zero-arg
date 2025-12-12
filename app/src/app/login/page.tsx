@@ -120,12 +120,42 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo credentials hint */}
-          <div className="mt-6 p-3 rounded-lg bg-[#F5F8FA] text-xs text-[#6B7280]">
-            <p className="font-medium text-[#1B3A5F] mb-1">Usuarios de prueba:</p>
-            <p>Admin: admin@afcp.org.ar / demo123</p>
-            <p>Miembro: miembro@empresa.com / demo123</p>
-          </div>
+          {/* Demo credentials - solo en desarrollo */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="mt-6 p-3 rounded-lg bg-[#F5F8FA] border border-[#E5E7EB]">
+              <p className="text-xs font-semibold text-[#1B3A5F] mb-2 flex items-center gap-1">
+                🔐 Usuarios de prueba
+              </p>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("admin@afcp.org.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-medium mr-2">
+                    Admin
+                  </span>
+                  admin@afcp.org.ar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("miembro@empresa.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-medium mr-2">
+                    Miembro
+                  </span>
+                  miembro@empresa.com
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Back to home */}

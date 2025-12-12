@@ -1,5 +1,6 @@
 // Datos extraídos de la Hoja de Ruta Net Zero Argentina 2050
-// Fuente: AFCP, FICEM, GCCA, ONUDI - Noviembre 2024
+// Fuente: AFCP, FICEM, GCCA, ONUDI
+// Actualizado con datos del Excel: GCCA_FICEM Argentina_Taller 3_Agosto2025
 
 export const currentYear = 2023;
 
@@ -507,6 +508,54 @@ export const organizaciones = [
 ];
 
 // ============================================
+// BENCHMARKING INTERNACIONAL (GNR 2023)
+// Datos de la imagen del taller de cierre
+// ============================================
+export const benchmarkingInternacional = [
+  // Ordenado por emisiones netas (menor a mayor)
+  { pais: "Austria", año: 2023, emisionesNetas: 514, coprocesamiento: 122, factorClinker: 69, cooprocesamientoPct: 25 },
+  { pais: "Alemania", año: 2023, emisionesNetas: 530, coprocesamiento: 105, factorClinker: 74, cooprocesamientoPct: 76 },
+  { pais: "Polonia", año: 2023, emisionesNetas: 549, coprocesamiento: 114, factorClinker: 71, cooprocesamientoPct: 79 },
+  { pais: "Argentina", año: 2023, emisionesNetas: 495, coprocesamiento: 114, factorClinker: 70, cooprocesamientoPct: 9, destacado: true },
+  { pais: "Francia", año: 2023, emisionesNetas: 584, coprocesamiento: 70, factorClinker: 77, cooprocesamientoPct: 56 },
+  { pais: "India", año: 2023, emisionesNetas: 582, coprocesamiento: 59, factorClinker: 73, cooprocesamientoPct: 9 },
+  { pais: "México", año: 2023, emisionesNetas: 582, coprocesamiento: 59, factorClinker: 68, cooprocesamientoPct: 30 },
+  { pais: "Filipinas", año: 2023, emisionesNetas: 561, coprocesamiento: 29, factorClinker: 70, cooprocesamientoPct: 24 },
+  { pais: "Reino Unido", año: 2024, emisionesNetas: 610, coprocesamiento: 76, factorClinker: 72, cooprocesamientoPct: 57 },
+  { pais: "Asia (n.e.c.)/Oceania", año: 2023, emisionesNetas: 555, coprocesamiento: 47, factorClinker: 86, cooprocesamientoPct: 15 },
+  { pais: "Central America", año: 2023, emisionesNetas: 593, coprocesamiento: 47, factorClinker: 69, cooprocesamientoPct: 24 },
+  { pais: "SOBOCE", año: 2023, emisionesNetas: 547, coprocesamiento: 0, factorClinker: 75, cooprocesamientoPct: 0 },
+  { pais: "Brasil", año: 2023, emisionesNetas: 578, coprocesamiento: 29, factorClinker: 71, cooprocesamientoPct: 31 },
+  { pais: "Latinoamérica", año: 2023, emisionesNetas: 581, coprocesamiento: 31, factorClinker: 70, cooprocesamientoPct: 22 },
+  { pais: "Global", año: 2023, emisionesNetas: 598, coprocesamiento: 23, factorClinker: 76, cooprocesamientoPct: 19 },
+  { pais: "Colombia", año: 2023, emisionesNetas: 605, coprocesamiento: 23, factorClinker: 68, cooprocesamientoPct: 8 },
+  { pais: "Perú HR", año: 2023, emisionesNetas: 587, coprocesamiento: 0, factorClinker: 74, cooprocesamientoPct: 0 },
+  { pais: "España", año: 2022, emisionesNetas: 641, coprocesamiento: 53, factorClinker: 79, cooprocesamientoPct: 40 },
+  { pais: "Chile HR", año: 2022, emisionesNetas: 626, coprocesamiento: 36, factorClinker: 70, cooprocesamientoPct: 17 },
+  { pais: "R. Dominicana HR", año: 2019, emisionesNetas: 620, coprocesamiento: 0, factorClinker: 70, cooprocesamientoPct: 1 },
+  { pais: "Egipto", año: 2023, emisionesNetas: 660, coprocesamiento: 27, factorClinker: 72, cooprocesamientoPct: 24 },
+  { pais: "Norte América", año: 2023, emisionesNetas: 671, coprocesamiento: 30, factorClinker: 85, cooprocesamientoPct: 16 },
+  { pais: "Middle East", año: 2023, emisionesNetas: 675, coprocesamiento: 29, factorClinker: 83, cooprocesamientoPct: 18 },
+];
+
+// Resumen para destacar Argentina
+export const benchmarkingResumen = {
+  argentina: {
+    posicion: 1, // Entre los más bajos del mundo
+    emisionesNetas: 495,
+    vsGlobal: -17, // % menor que global (598)
+    vsLatinoamerica: -15, // % menor que LAC (581)
+    factorClinker: 70,
+    coprocesamiento: 9,
+  },
+  mejoresPracticas: [
+    { pais: "Austria", indicador: "coprocesamiento", valor: "25%" },
+    { pais: "Alemania", indicador: "coprocesamiento", valor: "76%" },
+    { pais: "Argentina", indicador: "emisiones netas", valor: "495 kgCO₂/t" },
+  ],
+};
+
+// ============================================
 // HITOS DEL PROYECTO
 // ============================================
 export const hitosProyecto = [
@@ -514,4 +563,161 @@ export const hitosProyecto = [
   { año: 2025, titulo: "Primeras Implementaciones", descripcion: "Inicio de proyectos piloto con tecnologías de bajas emisiones", estado: "proximo" },
   { año: 2030, titulo: "Meta Intermedia", descripcion: "500 kgCO₂/tcem, 10% coprocesamiento, 65% factor clínker", estado: "futuro" },
   { año: 2050, titulo: "Net Zero", descripcion: "Neutralidad de carbono en la industria del cemento y hormigón", estado: "futuro" },
+];
+
+// ============================================
+// TRAYECTORIA 2030 - DATOS ESPECÍFICOS
+// ============================================
+
+// Metas 2030
+export const metas2030 = {
+  emisionesNetas: { valor: 500, unidad: "kgCO₂/tcem", actual: 507, progreso: 93 },
+  factorClinker: { valor: 65, unidad: "%", actual: 67, progreso: 67 },
+  coprocesamiento: { valor: 10, unidad: "%", actual: 7, progreso: 70 },
+  biomasa: { valor: 5, unidad: "%", actual: 4, progreso: 80 },
+  cdrFosil: { valor: 5, unidad: "%", actual: 3, progreso: 60 },
+  eficienciaTermica: { valor: 3400, unidad: "MJ/tCk", actual: 3425, progreso: 80 },
+  contenidoCemento: { valor: 377, unidad: "kg/m³", actual: 382, progreso: 85 },
+};
+
+// Serie histórica de emisiones (para gráfico de contexto)
+export const serieHistoricaEmisiones = [
+  { año: 2005, argentina: 591, lac: 650, global: 680 },
+  { año: 2010, argentina: 570, lac: 603, global: 634 },
+  { año: 2015, argentina: 545, lac: 595, global: 620 },
+  { año: 2020, argentina: 507, lac: 589, global: 624 },
+  { año: 2023, argentina: 507, lac: 581, global: 598 },
+  { año: 2030, argentina: 500, lac: null, global: null },
+];
+
+// Desafíos 2030
+export const desafios2030 = [
+  {
+    id: 1,
+    titulo: "Reducir el factor clínker",
+    descripcion: "Pasar del 67% actual al 65% requiere mayor disponibilidad de materiales suplementarios y adecuación de normas técnicas.",
+    icono: "factory",
+  },
+  {
+    id: 2,
+    titulo: "Aumentar coprocesamiento al 10%",
+    descripcion: "Requiere marcos regulatorios favorables y desarrollo de cadenas de suministro de combustibles alternativos.",
+    icono: "recycle",
+  },
+  {
+    id: 3,
+    titulo: "Implementar sistemas MRV",
+    descripcion: "Establecer sistemas robustos de Medición, Reporte y Verificación para transparentar el progreso.",
+    icono: "chartBar",
+  },
+  {
+    id: 4,
+    titulo: "Desarrollo de mercado para productos bajos en carbono",
+    descripcion: "Generar demanda de cementos y hormigones con menor huella de carbono.",
+    icono: "leaf",
+  },
+];
+
+// Oportunidades 2030
+export const oportunidades2030 = [
+  {
+    id: 1,
+    titulo: "Liderazgo en mitigación",
+    descripcion: "Argentina puede liderar la agenda de mitigación climática en el sector industrial con las menores emisiones de la región.",
+    impacto: "alto",
+  },
+  {
+    id: 2,
+    titulo: "Modernización de plantas",
+    descripcion: "Oportunidad de actualizar tecnología de hornos y sistemas de combustión con eficiencia energética.",
+    impacto: "medio",
+  },
+  {
+    id: 3,
+    titulo: "Productos diferenciados",
+    descripcion: "Desarrollar cementos bajos en carbono como ventaja competitiva para construcción sustentable.",
+    impacto: "alto",
+  },
+  {
+    id: 4,
+    titulo: "Economía circular",
+    descripcion: "Aprovechar residuos industriales y urbanos como combustibles alternativos y materias primas.",
+    impacto: "medio",
+  },
+];
+
+// Medidas habilitantes 2030
+export const medidasHabilitantes2030 = [
+  {
+    categoria: "Normas y Estándares",
+    medidas: [
+      "Actualización de normas IRAM para aumentar contenido de adiciones en cemento",
+      "Especificaciones técnicas para hormigones bajos en carbono",
+      "Normas de resistencia a 56 y 90 días",
+    ],
+  },
+  {
+    categoria: "Políticas Públicas",
+    medidas: [
+      "Compras públicas que incentiven cemento bajo en carbono",
+      "Marcos regulatorios claros para coprocesamiento de residuos",
+      "Incentivos fiscales para inversiones en tecnología limpia",
+    ],
+  },
+  {
+    categoria: "Mercado y Financiamiento",
+    medidas: [
+      "Acceso a financiamiento verde para proyectos de descarbonización",
+      "Desarrollo de etiquetado de huella de carbono en productos",
+      "Creación de mercados de carbono sectoriales",
+    ],
+  },
+  {
+    categoria: "Capacitación y Conocimiento",
+    medidas: [
+      "Programas de formación técnica en tecnologías de bajas emisiones",
+      "Transferencia de conocimiento desde países líderes",
+      "Investigación y desarrollo en materiales alternativos",
+    ],
+  },
+];
+
+// Acciones y compromisos del sector para 2030
+export const accionesCompromisos2030 = [
+  {
+    area: "Emisiones",
+    compromiso: "Mantener emisiones específicas por debajo de 500 kgCO₂/tcem",
+    estado: "en_progreso",
+    avance: 93,
+  },
+  {
+    area: "Factor Clínker",
+    compromiso: "Reducir factor clínker al 65% mediante mayor uso de adiciones",
+    estado: "en_progreso",
+    avance: 67,
+  },
+  {
+    area: "Combustibles Alternativos",
+    compromiso: "Alcanzar 10% de coprocesamiento (5% biomasa + 5% CDR)",
+    estado: "en_progreso",
+    avance: 70,
+  },
+  {
+    area: "Eficiencia Energética",
+    compromiso: "Mejorar eficiencia térmica a 3,400 MJ/tCk",
+    estado: "en_progreso",
+    avance: 80,
+  },
+  {
+    area: "Hormigón",
+    compromiso: "Reducir contenido de cemento en hormigón a 377 kg/m³",
+    estado: "en_progreso",
+    avance: 85,
+  },
+  {
+    area: "Transparencia",
+    compromiso: "Reportar anualmente indicadores según metodología GCCA",
+    estado: "completado",
+    avance: 100,
+  },
 ];

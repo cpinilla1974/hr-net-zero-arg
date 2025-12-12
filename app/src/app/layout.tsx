@@ -9,7 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 const publicSans = Public_Sans({
   variable: "--font-public-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {

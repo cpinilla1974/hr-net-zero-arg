@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
-  LayoutDashboard,
-  Map,
+  BarChart3,
+  Target,
+  Rocket,
   Calculator,
   Info,
   Settings,
@@ -16,6 +17,12 @@ import {
   ChevronDown,
   Shield,
   LogIn,
+  TrendingUp,
+  Upload,
+  CheckCircle,
+  Monitor,
+  GitMerge,
+  LineChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -29,17 +36,53 @@ const partnerLogos = [
 
 const navItems = [
   { href: "/", label: "Home", icon: Home, requiresAuth: false },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresAuth: false },
-  { href: "/hoja-de-ruta", label: "Hoja de Ruta", icon: Map, requiresAuth: false },
+  { href: "/benchmarking", label: "Benchmarking", icon: BarChart3, requiresAuth: false },
+  { href: "/2030", label: "Trayectoria 2030", icon: Target, requiresAuth: false },
+  { href: "/2050", label: "Trayectoria 2050", icon: Rocket, requiresAuth: false },
   { href: "/calculadora", label: "Calculadora", icon: Calculator, requiresAuth: true },
   { href: "/sobre", label: "Sobre", icon: Info, requiresAuth: false },
+];
+
+// Submenú de Seguimiento basado en roles
+const seguimientoSubMenu = [
+  {
+    href: "/seguimiento/submit-data",
+    label: "Submit Data",
+    icon: Upload,
+    roles: ["INFORMANTE_EMPRESA", "VISOR_EMPRESA"]
+  },
+  {
+    href: "/seguimiento/review-approve",
+    label: "Review & Approve",
+    icon: CheckCircle,
+    roles: ["SUPERVISOR_EMPRESA"]
+  },
+  {
+    href: "/seguimiento/monitoring",
+    label: "Monitoring Dashboard",
+    icon: Monitor,
+    roles: ["COORDINADOR_PAIS"]
+  },
+  {
+    href: "/seguimiento/aggregation",
+    label: "National Aggregation",
+    icon: GitMerge,
+    roles: ["ADMIN_PROCESO"]
+  },
+  {
+    href: "/seguimiento/trajectories",
+    label: "Trajectories & Results",
+    icon: LineChart,
+    roles: ["INFORMANTE_EMPRESA", "SUPERVISOR_EMPRESA", "VISOR_EMPRESA", "COORDINADOR_PAIS", "ADMIN_PROCESO"]
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [seguimientoOpen, setSeguimientoOpen] = useState(pathname.startsWith("/seguimiento"));
 
   const handleLogout = () => {
     logout();
@@ -69,7 +112,7 @@ export function Sidebar() {
       </div>
 
       {/* Navegación principal */}
-      <nav className="flex-1 px-3 py-4">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -106,10 +149,62 @@ export function Sidebar() {
               </li>
             );
           })}
+
+          {/* Seguimiento con submenú expandible */}
+          {isAuthenticated && (
+            <li>
+              <button
+                onClick={() => setSeguimientoOpen(!seguimientoOpen)}
+                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname.startsWith("/seguimiento")
+                    ? "bg-[#5B9BD5] text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <TrendingUp className="h-5 w-5" />
+                <span className="flex-1 text-left">Seguimiento</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    seguimientoOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Submenú */}
+              {seguimientoOpen && (
+                <ul className="mt-1 ml-2 space-y-1">
+                  {seguimientoSubMenu.map((subItem) => {
+                    // Verificar si el usuario tiene permiso para ver esta opción
+                    const hasPermission = user && subItem.roles.includes(user.role);
+                    if (!hasPermission) return null;
+
+                    const isSubActive = pathname === subItem.href;
+                    const SubIcon = subItem.icon;
+
+                    return (
+                      <li key={subItem.href}>
+                        <Link
+                          href={subItem.href}
+                          className={`flex items-center gap-3 rounded-lg pl-11 pr-4 py-2.5 text-sm font-medium transition-colors ${
+                            isSubActive
+                              ? "bg-[#5B9BD5] text-white"
+                              : "text-white/60 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <SubIcon className="h-4 w-4" />
+                          {subItem.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
 
         {/* Admin link */}
-        {isAdmin && (
+        {user?.role === "ADMIN_PROCESO" && (
           <div className="mt-4 pt-4 border-t border-white/10">
             <Link
               href="/admin"
