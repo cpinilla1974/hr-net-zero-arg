@@ -12,6 +12,7 @@ import {
   Globe,
   Beaker,
   X,
+  Target,
 } from "lucide-react";
 import {
   AreaChart,
@@ -33,6 +34,7 @@ import {
   gruposDescarbonizacion,
   ejesDescarbonizacion,
 } from "@/lib/data";
+import CascadaInteractiva from "@/components/charts/CascadaInteractiva";
 
 // Datos para gráfico de escenarios
 const escenarioData = [
@@ -100,14 +102,6 @@ export default function Trayectoria2050Page() {
   const [expandedGlobal, setExpandedGlobal] = useState(false);
   const [activeTab, setActiveTab] = useState<"clinker" | "coprocesamiento">("clinker");
   const [selectedEje, setSelectedEje] = useState<typeof ejesDescarbonizacion[0] | null>(null);
-
-  // Preparar datos del PieChart para los grupos
-  const gruposPieData = gruposDescarbonizacion.map((g) => ({
-    name: g.nombre,
-    value: g.aporte,
-    color: g.color,
-    grupo: g.grupo,
-  }));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -273,75 +267,107 @@ export default function Trayectoria2050Page() {
         </div>
       </section>
 
-      {/* SECCIÓN 3: LOS 5 PILARES - La Estrategia */}
+      {/* SECCIÓN 3: CASCADA INTERACTIVA - Elemento Central */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-[#5B9BD5]/10 text-[#1B3A5F] px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <Target className="h-4 w-4" />
+              Elemento Central de la Hoja de Ruta
+            </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Cinco Caminos hacia Net Zero</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              La descarbonización se logra a través de 5 grupos de estrategias complementarias,
-              cada una con su contribución específica al objetivo final.
+              La descarbonización se logra a través de 5 grupos de estrategias complementarias.
+              <br />
+              <span className="text-[#5B9BD5] font-medium">Haz clic en cada grupo para explorar sus ejes de acción.</span>
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* PieChart de grupos */}
-            <div className="h-96">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={gruposPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={140}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ value }) => `${value}%`}
-                  >
-                    {gruposPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number, name: string) => [`${value}%`, name]}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+          {/* Cascada Interactiva */}
+          <CascadaInteractiva onEjeSelect={setSelectedEje} />
 
-            {/* Lista de grupos */}
-            <div className="space-y-4">
-              {gruposDescarbonizacion.map((grupo) => (
-                <div
-                  key={grupo.grupo}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white border border-gray-200 hover:shadow-md transition-shadow"
-                >
-                  <div
-                    className="w-4 h-12 rounded-full"
-                    style={{ backgroundColor: grupo.color }}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-400">
-                        GRUPO {grupo.grupo}
+          {/* Tabla de Metas por Grupo */}
+          <div className="mt-12 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Metas de Reducción por Grupo</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left">Grupo</th>
+                    <th className="px-4 py-3 text-center">Aporte Total</th>
+                    <th className="px-4 py-3 text-center">Ejes</th>
+                    <th className="px-4 py-3 text-center">Horizonte</th>
+                    <th className="px-4 py-3 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {gruposDescarbonizacion.map((grupo) => (
+                    <tr key={grupo.grupo} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-3 h-8 rounded-full"
+                            style={{ backgroundColor: grupo.color }}
+                          />
+                          <div>
+                            <div className="font-medium text-gray-900">{grupo.nombre}</div>
+                            <div className="text-xs text-gray-500">Grupo {grupo.grupo}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span
+                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-white font-bold text-lg"
+                          style={{ backgroundColor: grupo.color }}
+                        >
+                          {grupo.aporte}%
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <div className="flex flex-wrap justify-center gap-1">
+                          {grupo.ejes.map((eje) => (
+                            <span
+                              key={eje}
+                              className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600"
+                            >
+                              {eje}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-center text-sm text-gray-600">
+                        {grupo.grupo === "C" ? "2030-2050" : "2023-2050"}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
+                          grupo.grupo === "C"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-green-100 text-green-700"
+                        }`}>
+                          {grupo.grupo === "C" ? "En desarrollo" : "En progreso"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-[#1B3A5F] text-white">
+                    <td className="px-6 py-4 font-semibold">Total Reducción</td>
+                    <td className="px-4 py-4 text-center">
+                      <span className="text-2xl font-black">100%</span>
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm">11 ejes</td>
+                    <td className="px-4 py-4 text-center text-sm">2050</td>
+                    <td className="px-4 py-4 text-center">
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-white/20">
+                        Net Zero
                       </span>
-                      <span
-                        className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
-                        style={{ backgroundColor: grupo.color }}
-                      >
-                        {grupo.aporte}%
-                      </span>
-                    </div>
-                    <div className="font-semibold text-gray-900">{grupo.nombre}</div>
-                  </div>
-                </div>
-              ))}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </div>
         </div>
@@ -598,47 +624,141 @@ export default function Trayectoria2050Page() {
         </div>
       </section>
 
-      {/* SECCIÓN 7: LOS 11 EJES - Explorador Técnico */}
+      {/* SECCIÓN 7: LOS 11 EJES - Tabla de Metas */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Los 11 Ejes de Descarbonización</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Trayectoria de los 11 Ejes</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Detalle técnico de cada eje de acción para profesionales del sector.
+              Metas específicas para cada eje desde la línea base hasta 2050.
+              <br />
+              <span className="text-sm text-gray-500">Haz clic en cualquier fila para ver más detalles.</span>
             </p>
           </div>
 
-          {/* Grid de ejes */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {ejesDescarbonizacion.map((eje) => {
-              const grupo = gruposDescarbonizacion.find((g) => g.grupo === eje.grupo);
-              return (
-                <button
-                  key={eje.id}
-                  onClick={() => setSelectedEje(eje)}
-                  className="text-left p-4 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all group"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <span
-                      className="text-xs font-bold px-2 py-1 rounded text-white"
-                      style={{ backgroundColor: grupo?.color }}
-                    >
-                      {eje.codigo}
-                    </span>
-                    <span className="text-lg font-bold text-gray-400 group-hover:text-[#5B9BD5]">
-                      {eje.aporte}%
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-[#5B9BD5]">
-                    {eje.nombre}
-                  </h3>
-                  <p className="text-sm text-gray-500 line-clamp-2">{eje.descripcion}</p>
-                  <div className="mt-3 flex items-center text-xs text-gray-400">
-                    <span>{eje.indicador}: {eje.valorActual} → {eje.meta2050}</span>
-                  </div>
-                </button>
-              );
-            })}
+          {/* Tabla de Metas por Eje */}
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#1B3A5F] text-white text-sm">
+                    <th className="px-4 py-4 text-left font-semibold">Eje</th>
+                    <th className="px-3 py-4 text-center font-semibold">Indicador</th>
+                    <th className="px-3 py-4 text-center font-semibold bg-gray-700/30">LB</th>
+                    <th className="px-3 py-4 text-center font-semibold">2030</th>
+                    <th className="px-3 py-4 text-center font-semibold">2040</th>
+                    <th className="px-3 py-4 text-center font-semibold bg-green-600/30">2050</th>
+                    <th className="px-3 py-4 text-center font-semibold">Aporte</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {ejesDescarbonizacion.map((eje) => {
+                    const grupo = gruposDescarbonizacion.find((g) => g.grupo === eje.grupo);
+                    return (
+                      <tr
+                        key={eje.id}
+                        onClick={() => setSelectedEje(eje)}
+                        className="hover:bg-blue-50 cursor-pointer transition-colors group"
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <span
+                              className="text-xs font-bold px-2 py-1 rounded text-white whitespace-nowrap"
+                              style={{ backgroundColor: grupo?.color }}
+                            >
+                              {eje.codigo}
+                            </span>
+                            <div>
+                              <div className="font-medium text-gray-900 group-hover:text-[#5B9BD5]">
+                                {eje.nombre}
+                              </div>
+                              <div className="text-xs text-gray-500 hidden sm:block">
+                                Grupo {eje.grupo}: {eje.grupoNombre}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                            {eje.indicador}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-center bg-gray-50/50">
+                          <span className="font-medium text-gray-700">{eje.valorActual}</span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="text-gray-600">
+                            {(eje as { meta2030?: string }).meta2030 || "-"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="text-gray-600">-</span>
+                        </td>
+                        <td className="px-3 py-3 text-center bg-green-50/50">
+                          <span className="font-semibold text-green-700">{eje.meta2050}</span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span
+                            className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm"
+                            style={{ backgroundColor: grupo?.color }}
+                          >
+                            {eje.aporte}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-[#1B3A5F] text-white font-semibold">
+                    <td className="px-4 py-4" colSpan={2}>Total Reducción</td>
+                    <td className="px-3 py-4 text-center">100%</td>
+                    <td className="px-3 py-4 text-center">-</td>
+                    <td className="px-3 py-4 text-center">-</td>
+                    <td className="px-3 py-4 text-center bg-green-600/30">0%</td>
+                    <td className="px-3 py-4 text-center">
+                      <span className="text-xl font-black">100%</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {/* Grid de tarjetas (versión compacta) */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Vista rápida por eje</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {ejesDescarbonizacion.map((eje) => {
+                const grupo = gruposDescarbonizacion.find((g) => g.grupo === eje.grupo);
+                return (
+                  <button
+                    key={eje.id}
+                    onClick={() => setSelectedEje(eje)}
+                    className="text-left p-4 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <span
+                        className="text-xs font-bold px-2 py-1 rounded text-white"
+                        style={{ backgroundColor: grupo?.color }}
+                      >
+                        {eje.codigo}
+                      </span>
+                      <span className="text-lg font-bold text-gray-400 group-hover:text-[#5B9BD5]">
+                        {eje.aporte}%
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-[#5B9BD5]">
+                      {eje.nombre}
+                    </h3>
+                    <p className="text-sm text-gray-500 line-clamp-2">{eje.descripcion}</p>
+                    <div className="mt-3 flex items-center text-xs text-gray-400">
+                      <span>{eje.indicador}: {eje.valorActual} → {eje.meta2050}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

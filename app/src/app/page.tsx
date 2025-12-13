@@ -14,7 +14,7 @@ import {
   Building2,
   Landmark,
 } from "lucide-react";
-import { benchmarkingResumen } from "@/lib/data";
+import { benchmarkingResumen, gruposDescarbonizacion } from "@/lib/data";
 
 export default function Home() {
   return (
@@ -231,6 +231,84 @@ export default function Home() {
                 Simular <ChevronRight className="w-4 h-4 ml-1" />
               </div>
             </Link>
+          </div>
+
+          {/* Cascada Estilizada - Resumen Visual */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-gray-900 text-xl font-bold">Estrategia de Descarbonización</h3>
+              <Link
+                href="/2050"
+                className="text-sm text-primary font-medium flex items-center gap-1 hover:underline"
+              >
+                Ver detalle completo <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Cascada horizontal simplificada */}
+            <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200 p-6">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                {/* Línea Base */}
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="w-16 h-24 rounded-lg bg-red-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    100%
+                  </div>
+                  <span className="text-xs text-gray-600 mt-2 font-medium">Línea Base</span>
+                </div>
+
+                {/* Flecha */}
+                <div className="flex-shrink-0 text-gray-300 text-2xl px-1">→</div>
+
+                {/* Grupos de reducción */}
+                {gruposDescarbonizacion.map((grupo, index) => (
+                  <div key={grupo.grupo} className="flex items-center gap-2">
+                    <div className="flex-shrink-0 flex flex-col items-center">
+                      <div
+                        className="w-16 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md transition-transform hover:scale-105"
+                        style={{
+                          backgroundColor: grupo.color,
+                          height: `${Math.max(40, grupo.aporte * 2)}px`,
+                        }}
+                      >
+                        -{grupo.aporte}%
+                      </div>
+                      <span className="text-xs text-gray-500 mt-2 text-center max-w-16 leading-tight">
+                        {grupo.nombre.split(" ")[0]}
+                      </span>
+                    </div>
+                    {index < gruposDescarbonizacion.length - 1 && (
+                      <div className="flex-shrink-0 text-gray-300 text-xl px-1">+</div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Flecha final */}
+                <div className="flex-shrink-0 text-gray-300 text-2xl px-1">=</div>
+
+                {/* Net Zero */}
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="w-16 h-24 rounded-lg bg-green-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    0%
+                  </div>
+                  <span className="text-xs text-green-600 mt-2 font-bold">Net Zero</span>
+                </div>
+              </div>
+
+              {/* Leyenda de grupos */}
+              <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-gray-200">
+                {gruposDescarbonizacion.map((grupo) => (
+                  <div key={grupo.grupo} className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: grupo.color }}
+                    />
+                    <span className="text-xs text-gray-600">
+                      {grupo.nombre} ({grupo.aporte}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Timeline Visual */}
