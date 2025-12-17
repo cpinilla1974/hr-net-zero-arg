@@ -331,45 +331,43 @@ export default function BenchmarkingPage() {
 
   return (
     <main className="flex-1 bg-[var(--background-secondary)] min-h-screen">
-      {/* Header */}
-      <div className="bg-white px-6 py-8 lg:px-8">
-        <h1 className="text-3xl font-bold text-[var(--primary)] tracking-tight">
-          Benchmarking Internacional
-        </h1>
-        <p className="mt-1 text-[var(--foreground-muted)]">
-          Comparativa de indicadores de la industria cementera a nivel mundial (GNR 1990-2023).
-        </p>
+      {/* Header con selector de año */}
+      <div className="bg-white px-6 py-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-[var(--primary)] tracking-tight">
+              Benchmarking Internacional
+            </h1>
+            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+              Comparativa de indicadores GNR 1990-2023
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-[var(--primary)]" />
+            <span className="text-sm font-medium text-[var(--primary)]">Año:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent font-medium"
+            >
+              {availableYears.length > 0 ? (
+                availableYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))
+              ) : (
+                [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))
+              )}
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div className="px-6 py-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Selector de Año Global */}
-          <div className="bg-white rounded-xl border border-[var(--border)] p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-[var(--primary)]" />
-                <span className="font-medium text-[var(--primary)]">Año de Comparación:</span>
-              </div>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="border border-[var(--border)] rounded-lg px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent font-medium"
-              >
-                {availableYears.length > 0 ? (
-                  availableYears.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))
-                ) : (
-                  [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010].map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))
-                )}
-              </select>
-            </div>
-          </div>
-
-          {/* Tarjetas Interactivas de Indicadores */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="px-6 py-4 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-4">
+          {/* Tarjetas Interactivas de Indicadores - 6 columnas */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {INDICATORS.map((indicator) => {
               const Icon = indicator.icon;
               const isSelected = selectedIndicator === indicator.id;
@@ -379,25 +377,22 @@ export default function BenchmarkingPage() {
                 <button
                   key={indicator.id}
                   onClick={() => setSelectedIndicator(indicator.id)}
-                  className={`bg-white rounded-xl p-5 border-2 transition-all text-left hover:shadow-lg ${
+                  className={`bg-white rounded-lg p-3 border-2 transition-all text-left hover:shadow-md ${
                     isSelected
-                      ? 'border-[var(--accent)] shadow-md'
+                      ? 'border-[var(--accent)] shadow-sm'
                       : 'border-[var(--border)] hover:border-[var(--accent)]/50'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium" style={{ color: indicator.color }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium truncate" style={{ color: indicator.color }}>
                       {indicator.name}
                     </p>
-                    <Icon className="h-5 w-5" style={{ color: indicator.color }} />
+                    <Icon className="h-4 w-4 flex-shrink-0" style={{ color: indicator.color }} />
                   </div>
-                  <p className="text-3xl font-bold text-[var(--primary)]">
+                  <p className="text-xl font-bold text-[var(--primary)]">
                     {value !== undefined ? value.toFixed(indicator.unit.includes('%') ? 1 : 0) : '—'}
                   </p>
-                  <p className="text-sm text-[var(--foreground-muted)] mt-1">{indicator.unit}</p>
-                  <p className="text-xs text-[var(--foreground-muted)] mt-2">
-                    Argentina {selectedYear}
-                  </p>
+                  <p className="text-xs text-[var(--foreground-muted)]">{indicator.unit}</p>
                 </button>
               );
             })}
