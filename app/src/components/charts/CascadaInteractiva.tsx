@@ -31,8 +31,7 @@ const cascadaData = [
     description: "Emisiones actuales (507 kgCO₂/tcem)",
   },
   ...gruposDescarbonizacion.map((g, index) => ({
-    name: g.nombre.split(" ")[0], // Tomar primera palabra
-    fullName: g.nombre,
+    name: g.nombre,
     value: -g.aporte,
     displayValue: g.aporte,
     isBase: false,
@@ -164,12 +163,9 @@ export default function CascadaInteractiva({ onEjeSelect, compact = false }: Cas
     <div className={`${compact ? "" : "bg-white rounded-2xl border border-gray-200 p-6"}`}>
       {!compact && (
         <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            Cascada de Descarbonización
+          <h3 className="text-3xl font-bold text-gray-900 mb-2">
+            Cinco Caminos hacia Net Zero
           </h3>
-          <p className="text-sm text-gray-600">
-            Haz clic en cada grupo para ver los ejes de acción
-          </p>
         </div>
       )}
 
@@ -200,7 +196,7 @@ export default function CascadaInteractiva({ onEjeSelect, compact = false }: Cas
                   return (
                     <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
                       <p className="font-semibold text-gray-900">
-                        {data.fullName || data.name}
+                        {data.name}
                       </p>
                       <p className="text-sm text-gray-600">{data.description}</p>
                       {data.grupo && (
@@ -218,9 +214,9 @@ export default function CascadaInteractiva({ onEjeSelect, compact = false }: Cas
             <Bar
               dataKey="displayValue"
               shape={(props: unknown) => <CustomBar {...(props as Parameters<typeof CustomBar>[0])} />}
-              onMouseEnter={(data: typeof waterfallData[0]) => setHoveredBar(data.name)}
+              onMouseEnter={(data: any) => setHoveredBar(data?.name)}
               onMouseLeave={() => setHoveredBar(null)}
-              onClick={(data: typeof waterfallData[0]) => handleBarClick(data.grupo)}
+              onClick={(data: any) => handleBarClick(data?.grupo)}
             />
           </BarChart>
         </ResponsiveContainer>

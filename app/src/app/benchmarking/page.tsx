@@ -48,6 +48,58 @@ const COLORS = {
   India: "#F97316",
 };
 
+// Indicadores disponibles
+const INDICATORS = [
+  {
+    id: "net_co2_kg_cement",
+    name: "Emisiones Netas",
+    unit: "kgCO₂/t",
+    icon: TrendingDown,
+    color: "#5B9BD5",
+    multiplier: 1,
+  },
+  {
+    id: "clinker_cement_ratio",
+    name: "Factor Clínker",
+    unit: "%",
+    icon: Factory,
+    color: "#1B3A5F",
+    multiplier: 100,
+  },
+  {
+    id: "thermal_energy_mj_clinker",
+    name: "Energía Térmica",
+    unit: "MJ/t",
+    icon: Flame,
+    color: "#F59E0B",
+    multiplier: 1,
+  },
+  {
+    id: "electric_kwh_cement",
+    name: "Consumo Eléctrico",
+    unit: "kWh/t",
+    icon: Zap,
+    color: "#8B5CF6",
+    multiplier: 1,
+  },
+  {
+    id: "alternative_fuel_rate",
+    name: "Combustibles Alternativos",
+    unit: "%",
+    icon: Leaf,
+    color: "#10B981",
+    multiplier: 100,
+  },
+  {
+    id: "biomass_rate",
+    name: "Biomasa",
+    unit: "%",
+    icon: Globe,
+    color: "#EC4899",
+    multiplier: 100,
+  },
+];
+
 export default function BenchmarkingPage() {
   const argentina = benchmarkingInternacional.find((d) => d.pais === "Argentina");
   const global = benchmarkingInternacional.find((d) => d.pais === "Global");
@@ -60,14 +112,17 @@ export default function BenchmarkingPage() {
   const [electricSeries, setElectricSeries] = useState<TimeSeriesData[] | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Estado para selector de año en gráficos de comparación
+  // Estado para selector de año GLOBAL (aplica a toda la página)
   const [selectedYear, setSelectedYear] = useState(2023);
-  const [comparisonData, setComparisonData] = useState<{ region: string; clinkerRatio: number; altFuelRate: number }[] | null>(null);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
 
-  // Estado para año del gráfico de emisiones principal
-  const [emissionsYear, setEmissionsYear] = useState(2023);
-  const [emissionsComparison, setEmissionsComparison] = useState<{ region: string; emissions: number }[] | null>(null);
+  // Estado para indicador seleccionado y datos del gráfico principal
+  const [selectedIndicator, setSelectedIndicator] = useState(INDICATORS[0].id);
+  const [indicatorComparison, setIndicatorComparison] = useState<{ region: string; value: number }[] | null>(null);
+  const [argentinaValues, setArgentinaValues] = useState<Record<string, number>>({});
+
+  // Estado para selector de año en gráficos de comparación inferiores
+  const [comparisonData, setComparisonData] = useState<{ region: string; clinkerRatio: number; altFuelRate: number }[] | null>(null);
 
   // Cargar datos de la API
   useEffect(() => {
@@ -163,19 +218,73 @@ export default function BenchmarkingPage() {
     fetchData();
   }, []);
 
-  // Cargar años disponibles y datos de comparación
+  // Cargar años disponibles desde Argentina
+  useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const res = await fetch('/api/benchmarking?action=time_series&indicator=net_co2_kg_cement&regions=Argentina');
+        if (res.ok) {
+          const data = await res.json();
+          const argentinaData = data.series?.Argentina || [];
+          const years = argentinaData.map((d: { year: number }) => d.year).sort((a: number, b: number) => b - a);
+          setAvailableYears(years);
+        }
+      } catch (error) {
+        console.error("Error fetching available years:", error);
+      }
+    };
+
+    fetchAvailableYears();
+  }, []);
+
+  // Cargar datos del indicador seleccionado y valores de Argentina
+  useEffect(() => {
+    const fetchIndicatorData = async () => {
+      try {
+        // Construir lista de todos los indicadores separados por comas
+        const indicatorsList = INDICATORS.map(ind => ind.id).join(',');
+
+        const res = await fetch(`/api/benchmarking?action=comparison&year=${selectedYear}&indicators=${indicatorsList}`);
+        if (res.ok) {
+          const data = await res.json();
+
+          // Guardar valores de Argentina para cada indicador
+          const argValues: Record<string, number> = {};
+          INDICATORS.forEach(indicator => {
+            const indicatorData = data.comparison?.[indicator.id] || [];
+            const argData = indicatorData.find((d: { region: string; value: number }) => d.region === 'Argentina');
+            if (argData) {
+              argValues[indicator.id] = argData.value * indicator.multiplier;
+            }
+          });
+          setArgentinaValues(argValues);
+
+          // Cargar datos de comparación para el indicador seleccionado
+          const selectedData = data.comparison?.[selectedIndicator] || [];
+          const regions = selectedData.map((d: { region: string; value: number }) => {
+            const indicator = INDICATORS.find(ind => ind.id === selectedIndicator);
+            return {
+              region: d.region,
+              value: d.value * (indicator?.multiplier || 1)
+            };
+          });
+          setIndicatorComparison(regions);
+        }
+      } catch (error) {
+        console.error("Error fetching indicator data:", error);
+      }
+    };
+
+    fetchIndicatorData();
+  }, [selectedYear, selectedIndicator]);
+
+  // Cargar datos de comparación para gráficos inferiores (factor clínker y combustibles alternativos)
   useEffect(() => {
     const fetchComparisonData = async () => {
       try {
         const res = await fetch(`/api/benchmarking?action=comparison&year=${selectedYear}&indicators=clinker_cement_ratio,alternative_fuel_rate`);
         if (res.ok) {
           const data = await res.json();
-
-          // Extraer años disponibles de las series de emisiones
-          if (emissionsSeries && emissionsSeries.length > 0) {
-            const years = (emissionsSeries as unknown as Record<string, number>[]).map(d => d.year).filter(Boolean);
-            setAvailableYears(years);
-          }
 
           // Transformar datos de comparación
           const clinkerData = data.comparison?.clinker_cement_ratio || [];
@@ -204,31 +313,7 @@ export default function BenchmarkingPage() {
     };
 
     fetchComparisonData();
-  }, [selectedYear, emissionsSeries]);
-
-  // Cargar datos de emisiones por año para el gráfico principal
-  useEffect(() => {
-    const fetchEmissionsComparison = async () => {
-      try {
-        const res = await fetch(`/api/benchmarking?action=comparison&year=${emissionsYear}&indicators=net_co2_kg_cement`);
-        if (res.ok) {
-          const data = await res.json();
-          const emissionsData = data.comparison?.net_co2_kg_cement || [];
-
-          const regions = emissionsData.map((d: { region: string; value: number }) => ({
-            region: d.region,
-            emissions: d.value
-          }));
-
-          setEmissionsComparison(regions);
-        }
-      } catch (error) {
-        console.error("Error fetching emissions comparison:", error);
-      }
-    };
-
-    fetchEmissionsComparison();
-  }, [emissionsYear]);
+  }, [selectedYear]);
 
   // Componente para leyenda de series históricas
   const SeriesLegend = () => (
@@ -258,143 +343,134 @@ export default function BenchmarkingPage() {
 
       <div className="px-6 py-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* KPIs destacados */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Argentina */}
-            <div className="bg-white rounded-xl p-5 border-2 border-[var(--accent)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-[var(--foreground-muted)] font-medium">Argentina</p>
-                <Award className="h-5 w-5 text-[var(--accent)]" />
+          {/* Selector de Año Global */}
+          <div className="bg-white rounded-xl border border-[var(--border)] p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-[var(--primary)]" />
+                <span className="font-medium text-[var(--primary)]">Año de Comparación:</span>
               </div>
-              <p className="text-4xl font-bold text-[var(--accent)]">{argentina?.emisionesNetas}</p>
-              <p className="text-sm text-[var(--foreground-muted)]">kgCO₂/t cemento</p>
-              <p className="text-xs text-[var(--success)] mt-1 font-medium">
-                Entre los más bajos del mundo
-              </p>
-            </div>
-
-            {/* vs Global */}
-            <div className="bg-white rounded-xl p-5 border border-[var(--border)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-[var(--foreground-muted)] font-medium">vs Global</p>
-                <Globe className="h-5 w-5 text-[var(--primary)]" />
-              </div>
-              <p className="text-4xl font-bold text-[var(--primary)]">{global?.emisionesNetas}</p>
-              <p className="text-sm text-[var(--foreground-muted)]">kgCO₂/t cemento</p>
-              <p className="text-xs text-[var(--success)] mt-1">
-                Argentina -{benchmarkingResumen.argentina.vsGlobal}% menor
-              </p>
-            </div>
-
-            {/* vs Latinoamérica */}
-            <div className="bg-white rounded-xl p-5 border border-[var(--border)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-[var(--foreground-muted)] font-medium">vs Latinoamérica</p>
-                <Leaf className="h-5 w-5 text-[var(--success)]" />
-              </div>
-              <p className="text-4xl font-bold text-[var(--primary)]">{latinoamerica?.emisionesNetas}</p>
-              <p className="text-sm text-[var(--foreground-muted)]">kgCO₂/t cemento</p>
-              <p className="text-xs text-[var(--success)] mt-1">
-                Argentina -{benchmarkingResumen.argentina.vsLatinoamerica}% menor
-              </p>
-            </div>
-
-            {/* Factor Clínker */}
-            <div className="bg-white rounded-xl p-5 border border-[var(--border)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-[var(--foreground-muted)] font-medium">Factor Clínker ARG</p>
-                <TrendingDown className="h-5 w-5 text-[var(--success)]" />
-              </div>
-              <p className="text-4xl font-bold text-[var(--primary)]">{argentina?.factorClinker}%</p>
-              <p className="text-sm text-[var(--foreground-muted)]">vs global {global?.factorClinker}%</p>
-              <p className="text-xs text-[var(--success)] mt-1">
-                -{(global?.factorClinker || 0) - (argentina?.factorClinker || 0)}% menor
-              </p>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="border border-[var(--border)] rounded-lg px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent font-medium"
+              >
+                {availableYears.length > 0 ? (
+                  availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))
+                ) : (
+                  [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010].map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))
+                )}
+              </select>
             </div>
           </div>
 
-          {/* Gráfico principal de barras */}
-          <div className="bg-white rounded-xl border border-[var(--border)] p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">
-                  Emisiones Netas por País/Región
-                </h2>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  kgCO₂ por tonelada de material cementicio (GNR {emissionsYear})
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-[var(--foreground-muted)]" />
-                <select
-                  value={emissionsYear}
-                  onChange={(e) => setEmissionsYear(parseInt(e.target.value))}
-                  className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
+          {/* Tarjetas Interactivas de Indicadores */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {INDICATORS.map((indicator) => {
+              const Icon = indicator.icon;
+              const isSelected = selectedIndicator === indicator.id;
+              const value = argentinaValues[indicator.id];
+
+              return (
+                <button
+                  key={indicator.id}
+                  onClick={() => setSelectedIndicator(indicator.id)}
+                  className={`bg-white rounded-xl p-5 border-2 transition-all text-left hover:shadow-lg ${
+                    isSelected
+                      ? 'border-[var(--accent)] shadow-md'
+                      : 'border-[var(--border)] hover:border-[var(--accent)]/50'
+                  }`}
                 >
-                  {availableYears.length > 0 ? (
-                    availableYears.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))
-                  ) : (
-                    [2010, 2015, 2018, 2019, 2020, 2021, 2022, 2023, 2024].map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))
-                  )}
-                </select>
-              </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium" style={{ color: indicator.color }}>
+                      {indicator.name}
+                    </p>
+                    <Icon className="h-5 w-5" style={{ color: indicator.color }} />
+                  </div>
+                  <p className="text-3xl font-bold text-[var(--primary)]">
+                    {value !== undefined ? value.toFixed(indicator.unit.includes('%') ? 1 : 0) : '—'}
+                  </p>
+                  <p className="text-sm text-[var(--foreground-muted)] mt-1">{indicator.unit}</p>
+                  <p className="text-xs text-[var(--foreground-muted)] mt-2">
+                    Argentina {selectedYear}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Gráfico principal dinámico */}
+          <div className="bg-white rounded-xl border border-[var(--border)] p-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">
+                Comparación por País/Región - {INDICATORS.find(i => i.id === selectedIndicator)?.name}
+              </h2>
+              <p className="text-sm text-[var(--foreground-muted)]">
+                {INDICATORS.find(i => i.id === selectedIndicator)?.unit} ({selectedYear})
+              </p>
             </div>
             <div className="h-[500px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
-                  data={emissionsComparison && emissionsComparison.length > 0 ?
-                    emissionsComparison.map(d => ({
-                      pais: d.region === 'South_Latin_America' ? 'Latinoamérica' : d.region,
-                      emisionesNetas: d.emissions
-                    })).sort((a, b) => b.emisionesNetas - a.emisionesNetas) :
-                    datosOrdenados
-                  }
-                  layout="vertical"
-                  margin={{ top: 10, right: 30, left: 100, bottom: 10 }}
-                >
-                  <XAxis type="number" domain={[0, 750]} tick={{ fontSize: 12 }} />
-                  <YAxis
-                    dataKey="pais"
-                    type="category"
-                    tick={{ fontSize: 12 }}
-                    width={95}
-                  />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-3 rounded-lg shadow-lg border border-[var(--border)]">
-                            <p className="font-semibold text-[var(--primary)]">{data.pais}</p>
-                            <p className="text-sm">Emisiones Netas: <span className="font-medium">{data.emisionesNetas} kgCO₂/t</span></p>
-                            {data.cooprocesamientoPct && <p className="text-sm">Coprocesamiento: <span className="font-medium">{data.cooprocesamientoPct}%</span></p>}
-                            {data.factorClinker && <p className="text-sm">Factor Clínker: <span className="font-medium">{data.factorClinker}%</span></p>}
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar dataKey="emisionesNetas" name="Emisiones Netas" radius={[0, 4, 4, 0]}>
-                    {(emissionsComparison && emissionsComparison.length > 0 ?
-                      emissionsComparison.map(d => ({
+              {indicatorComparison && indicatorComparison.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart
+                    data={indicatorComparison
+                      .map(d => ({
                         pais: d.region === 'South_Latin_America' ? 'Latinoamérica' : d.region,
-                        emisionesNetas: d.emissions
-                      })).sort((a, b) => b.emisionesNetas - a.emisionesNetas) :
-                      datosOrdenados
-                    ).map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.pais === "Argentina" ? "#5B9BD5" : entry.pais === "Global" || entry.pais === "Latinoamérica" ? "#1B3A5F" : "#94A3B8"}
-                      />
-                    ))}
-                  </Bar>
-                </ComposedChart>
-              </ResponsiveContainer>
+                        value: d.value
+                      }))
+                      .sort((a, b) => b.value - a.value)}
+                    layout="vertical"
+                    margin={{ top: 10, right: 30, left: 100, bottom: 10 }}
+                  >
+                    <XAxis type="number" tick={{ fontSize: 12 }} />
+                    <YAxis
+                      dataKey="pais"
+                      type="category"
+                      tick={{ fontSize: 12 }}
+                      width={95}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          const indicator = INDICATORS.find(i => i.id === selectedIndicator);
+                          return (
+                            <div className="bg-white p-3 rounded-lg shadow-lg border border-[var(--border)]">
+                              <p className="font-semibold text-[var(--primary)]">{data.pais}</p>
+                              <p className="text-sm">
+                                {indicator?.name}: <span className="font-medium">{data.value.toFixed(1)} {indicator?.unit}</span>
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="value" name={INDICATORS.find(i => i.id === selectedIndicator)?.name} radius={[0, 4, 4, 0]}>
+                      {indicatorComparison
+                        .map(d => ({
+                          pais: d.region === 'South_Latin_America' ? 'Latinoamérica' : d.region,
+                          value: d.value
+                        }))
+                        .sort((a, b) => b.value - a.value)
+                        .map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.pais === "Argentina" ? "#5B9BD5" : entry.pais === "Global" || entry.pais === "Latinoamérica" ? "#1B3A5F" : "#94A3B8"}
+                          />
+                        ))}
+                    </Bar>
+                  </ComposedChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-[var(--foreground-muted)]">
+                  Cargando datos de comparación...
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-center gap-6 mt-4 text-sm">
               <div className="flex items-center gap-2">

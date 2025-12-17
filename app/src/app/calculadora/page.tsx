@@ -305,7 +305,7 @@ function SliderInput({
 
 export default function CalculadoraPage() {
   return (
-    <ProtectedRoute requiredRole="member">
+    <ProtectedRoute allowedRoles={["INFORMANTE_EMPRESA", "SUPERVISOR_EMPRESA", "ADMIN_PROCESO"]}>
       <CalculadoraContent />
     </ProtectedRoute>
   );

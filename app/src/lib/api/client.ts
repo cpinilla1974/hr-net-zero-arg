@@ -56,7 +56,7 @@ export class APIClient {
     };
 
     if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
+      (headers as Record<string, string>)["Authorization"] = `Bearer ${this.token}`;
     }
 
     try {

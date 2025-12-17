@@ -580,15 +580,67 @@ export const metas2030 = {
   contenidoCemento: { valor: 377, unidad: "kg/m³", actual: 382, progreso: 85 },
 };
 
-// Serie histórica de emisiones (para gráfico de contexto)
-export const serieHistoricaEmisiones = [
-  { año: 2005, argentina: 591, lac: 650, global: 680 },
-  { año: 2010, argentina: 570, lac: 603, global: 634 },
-  { año: 2015, argentina: 545, lac: 595, global: 620 },
-  { año: 2020, argentina: 507, lac: 589, global: 624 },
-  { año: 2023, argentina: 507, lac: 581, global: 598 },
-  { año: 2030, argentina: 500, lac: null, global: null },
+// Trayectorias 2023-2030 para cada indicador clave
+// meta: trayectoria planificada (interpolación lineal)
+// real: datos reales reportados (null = aún no disponible)
+
+export const trayectoriaEmisiones2030 = [
+  { año: 2023, meta: 507, real: 507 },
+  { año: 2024, meta: 506, real: null },
+  { año: 2025, meta: 505, real: null },
+  { año: 2026, meta: 504, real: null },
+  { año: 2027, meta: 503, real: null },
+  { año: 2028, meta: 502, real: null },
+  { año: 2029, meta: 501, real: null },
+  { año: 2030, meta: 500, real: null },
 ];
+
+export const trayectoriaFactorClinker2030 = [
+  { año: 2023, meta: 67, real: 67 },
+  { año: 2024, meta: 66.7, real: null },
+  { año: 2025, meta: 66.4, real: null },
+  { año: 2026, meta: 66.1, real: null },
+  { año: 2027, meta: 65.9, real: null },
+  { año: 2028, meta: 65.6, real: null },
+  { año: 2029, meta: 65.3, real: null },
+  { año: 2030, meta: 65, real: null },
+];
+
+export const trayectoriaCoprocesamiento2030 = [
+  { año: 2023, meta: 7, real: 7 },
+  { año: 2024, meta: 7.4, real: null },
+  { año: 2025, meta: 7.9, real: null },
+  { año: 2026, meta: 8.3, real: null },
+  { año: 2027, meta: 8.7, real: null },
+  { año: 2028, meta: 9.1, real: null },
+  { año: 2029, meta: 9.6, real: null },
+  { año: 2030, meta: 10, real: null },
+];
+
+export const trayectoriaBiomasa2030 = [
+  { año: 2023, meta: 4, real: 4 },
+  { año: 2024, meta: 4.1, real: null },
+  { año: 2025, meta: 4.3, real: null },
+  { año: 2026, meta: 4.4, real: null },
+  { año: 2027, meta: 4.6, real: null },
+  { año: 2028, meta: 4.7, real: null },
+  { año: 2029, meta: 4.9, real: null },
+  { año: 2030, meta: 5, real: null },
+];
+
+export const trayectoriaEficienciaTermica2030 = [
+  { año: 2023, meta: 3425, real: 3425 },
+  { año: 2024, meta: 3421, real: null },
+  { año: 2025, meta: 3418, real: null },
+  { año: 2026, meta: 3414, real: null },
+  { año: 2027, meta: 3411, real: null },
+  { año: 2028, meta: 3407, real: null },
+  { año: 2029, meta: 3404, real: null },
+  { año: 2030, meta: 3400, real: null },
+];
+
+// Alias para compatibilidad
+export const serieHistoricaEmisiones = trayectoriaEmisiones2030;
 
 // Desafíos 2030
 export const desafios2030 = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Upload,
   FileSpreadsheet,
@@ -9,11 +9,16 @@ import {
   CheckCircle2,
   X,
   Check,
+  Loader2,
 } from "lucide-react";
 import { plantillasArchivos, type TipoArchivo } from "@/types/seguimiento";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { submissionsAPI } from "@/lib/api/submissions";
+import type { Submission } from "@/types/submission";
 
 function SubmitDataContent() {
+  const { user } = useAuth();
   const [año, setAño] = useState(new Date().getFullYear());
   const [archivos, setArchivos] = useState<{
     GNR?: File;
@@ -23,9 +28,76 @@ function SubmitDataContent() {
   const [observaciones, setObservaciones] = useState("");
   const [isDragging, setIsDragging] = useState<TipoArchivo | null>(null);
 
-  const handleFileSelect = (tipo: TipoArchivo, file: File | null) => {
+  // Estado para la API
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Cargar submissions del proceso al montar el componente
+  useEffect(() => {
+    const loadSubmission = async () => {
+      if (!user?.empresa_id) {
+        setError("No se pudo determinar tu empresa");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const procesoId = "hr-argentina-2024"; // TODO: Obtener dinámicamente
+
+        // Listar submissions del proceso
+        const submissions = await submissionsAPI.list(procesoId);
+
+        // Buscar submission del usuario para el año seleccionado
+        const userSubmission = submissions.find(
+          (s) => s.empresa_id === user.empresa_id
+        );
+
+        if (userSubmission) {
+          setSubmission(userSubmission);
+        } else {
+          // Si no existe, crear una nueva submission en estado BORRADOR
+          const newSubmission = await submissionsAPI.create(procesoId, {
+            empresa_id: user.empresa_id,
+          });
+          setSubmission(newSubmission);
+        }
+      } catch (err) {
+        console.error("Error cargando submission:", err);
+        setError("Error al cargar la información del reporte");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSubmission();
+  }, [user, año]);
+
+  const handleFileSelect = async (tipo: TipoArchivo, file: File | null) => {
     if (file) {
+      // Guardar archivo en estado local
       setArchivos((prev) => ({ ...prev, [tipo]: file }));
+
+      // Si hay una submission, subir el archivo al backend
+      if (submission) {
+        try {
+          setError(null);
+          setSuccessMessage(null);
+
+          // Subir archivo
+          const updatedSubmission = await submissionsAPI.uploadFile(submission.id, file);
+          setSubmission(updatedSubmission);
+
+          setSuccessMessage(`Archivo ${file.name} subido exitosamente`);
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+          console.error("Error subiendo archivo:", err);
+          setError(`Error al subir el archivo ${file.name}`);
+        }
+      }
     } else {
       setArchivos((prev) => {
         const { [tipo]: _, ...rest } = prev;
@@ -52,9 +124,30 @@ function SubmitDataContent() {
     }
   };
 
-  const handleSendToSupervisor = () => {
-    console.log("Enviando a supervisor...", { año, archivos, observaciones });
-    // TODO: Implementar envío a supervisor
+  const handleSendToSupervisor = async () => {
+    if (!submission) return;
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      setSuccessMessage(null);
+
+      // Agregar comentario si hay observaciones
+      if (observaciones.trim()) {
+        await submissionsAPI.addComment(submission.id, observaciones);
+      }
+
+      // Enviar para revisión
+      const updatedSubmission = await submissionsAPI.submit(submission.id);
+      setSubmission(updatedSubmission);
+
+      setSuccessMessage("¡Reporte enviado exitosamente a FICEM para procesamiento!");
+    } catch (err) {
+      console.error("Error enviando reporte:", err);
+      setError("Error al enviar el reporte. Por favor intenta nuevamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -64,14 +157,14 @@ function SubmitDataContent() {
   };
 
   const allRequiredFilesUploaded = archivos.GNR && archivos.ADICIONALES_2030;
-  const currentStatus = "BORRADOR"; // TODO: Get from backend
+  const currentStatus = submission?.estado_actual || "BORRADOR";
 
-  // Timeline steps (Flujo Simplificado)
+  // Timeline steps (Flujo Simplificado basado en la API)
   const statusSteps = [
     { label: "Borrador", status: "BORRADOR", description: "Aún no has enviado tu reporte" },
     { label: "Enviado", status: "ENVIADO", description: "Enviado a FICEM para procesamiento" },
-    { label: "En Proceso", status: "EN_PROCESO", description: "FICEM está procesando los datos" },
-    { label: "Completado", status: "COMPLETADO", description: "Reporte procesado exitosamente" },
+    { label: "En Revisión", status: "EN_REVISION_FICEM", description: "FICEM está procesando los datos" },
+    { label: "Aprobado", status: "APROBADO_FICEM", description: "Reporte aprobado exitosamente" },
   ];
 
   const getCurrentStepIndex = () => {
@@ -79,6 +172,20 @@ function SubmitDataContent() {
   };
 
   const currentStepIndex = getCurrentStepIndex();
+
+  // Mostrar loading mientras carga
+  if (isLoading) {
+    return (
+      <main className="flex-1 p-8 bg-gray-50">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-[#5B9BD5] mx-auto mb-4" />
+            <p className="text-gray-600">Cargando información del reporte...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 p-8 bg-gray-50">
@@ -90,6 +197,27 @@ function SubmitDataContent() {
             Gestiona la subida de tu reporte de huella de carbono.
           </p>
         </div>
+
+        {/* Mensajes de error y éxito */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <X className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900 mb-1">Error</h3>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-green-900 mb-1">Éxito</h3>
+              <p className="text-green-700 text-sm">{successMessage}</p>
+            </div>
+          </div>
+        )}
 
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -299,11 +427,29 @@ function SubmitDataContent() {
             <div className="flex justify-end">
               <button
                 onClick={handleSendToSupervisor}
-                disabled={!allRequiredFilesUploaded}
+                disabled={
+                  !allRequiredFilesUploaded ||
+                  isSubmitting ||
+                  currentStatus !== "BORRADOR"
+                }
                 className="flex items-center gap-2 px-8 py-3 text-base font-bold text-white bg-[#5B9BD5] rounded-lg hover:bg-[#4A8BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
-                <Send className="w-5 h-5" />
-                Enviar Reporte
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Enviando...
+                  </>
+                ) : currentStatus !== "BORRADOR" ? (
+                  <>
+                    <CheckCircle2 className="w-5 h-5" />
+                    Ya Enviado
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Enviar Reporte
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -366,9 +512,30 @@ function SubmitDataContent() {
               <h2 className="text-xl font-bold text-gray-900 mb-5">
                 Comentarios de FICEM
               </h2>
-              <div className="text-center py-8">
-                <p className="text-gray-500">Aún no hay comentarios de FICEM.</p>
-              </div>
+              {submission?.comentarios && submission.comentarios.length > 0 ? (
+                <div className="space-y-4">
+                  {submission.comentarios.map((comentario) => (
+                    <div
+                      key={comentario.id}
+                      className="p-4 bg-blue-50 border border-blue-100 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {comentario.usuario_nombre}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(comentario.created_at).toLocaleDateString("es-AR")}
+                        </p>
+                      </div>
+                      <p className="text-gray-700 text-sm">{comentario.texto}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Aún no hay comentarios de FICEM.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

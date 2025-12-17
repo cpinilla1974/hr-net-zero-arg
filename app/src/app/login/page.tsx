@@ -126,34 +126,188 @@ export default function LoginPage() {
               <p className="text-xs font-semibold text-[#1B3A5F] mb-2 flex items-center gap-1">
                 🔐 Usuarios de prueba
               </p>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {/* Admin FICEM */}
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail("admin@afcp.org.ar");
-                    setPassword("demo123");
+                    setEmail("ficem@ficem.org");
+                    setPassword("ficem123");
                   }}
                   className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
                 >
                   <span className="inline-block px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-medium mr-2">
-                    Admin
+                    Admin FICEM
                   </span>
-                  admin@afcp.org.ar
+                  ficem@ficem.org
                 </button>
+
+                {/* Coordinador AFCP */}
                 <button
                   type="button"
                   onClick={() => {
-                    setEmail("miembro@empresa.com");
+                    setEmail("coordinador@afcp.org.ar");
                     setPassword("demo123");
                   }}
                   className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
                 >
                   <span className="inline-block px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-medium mr-2">
-                    Miembro
+                    Coord. País
                   </span>
-                  miembro@empresa.com
+                  coordinador@afcp.org.ar
+                </button>
+
+                <div className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wide pt-2 pb-1">
+                  Holcim Argentina
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("supervisor@holcim.com.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium mr-2">
+                    Supervisor
+                  </span>
+                  supervisor@holcim.com.ar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("informante@holcim.com.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px] font-medium mr-2">
+                    Informante
+                  </span>
+                  informante@holcim.com.ar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("visor@holcim.com.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-medium mr-2">
+                    Visor
+                  </span>
+                  visor@holcim.com.ar
+                </button>
+
+                <div className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wide pt-2 pb-1">
+                  Loma Negra
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("supervisor@lomanegra.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium mr-2">
+                    Supervisor
+                  </span>
+                  supervisor@lomanegra.com
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("informante@lomanegra.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px] font-medium mr-2">
+                    Informante
+                  </span>
+                  informante@lomanegra.com
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("visor@lomanegra.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-medium mr-2">
+                    Visor
+                  </span>
+                  visor@lomanegra.com
+                </button>
+
+                <div className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wide pt-2 pb-1">
+                  Avellaneda
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("supervisor@avellaneda.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium mr-2">
+                    Supervisor
+                  </span>
+                  supervisor@avellaneda.com
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("informante@avellaneda.com");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px] font-medium mr-2">
+                    Informante
+                  </span>
+                  informante@avellaneda.com
+                </button>
+
+                <div className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wide pt-2 pb-1">
+                  PCR
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("supervisor@pcr.com.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium mr-2">
+                    Supervisor
+                  </span>
+                  supervisor@pcr.com.ar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("informante@pcr.com.ar");
+                    setPassword("demo123");
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
+                >
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px] font-medium mr-2">
+                    Informante
+                  </span>
+                  informante@pcr.com.ar
                 </button>
               </div>
+              <p className="text-[10px] text-[#6B7280] mt-2">
+                Contraseña: <span className="font-mono font-semibold">demo123</span>
+                <br />
+                <span className="text-[9px]">(Admin FICEM usa: <span className="font-mono font-semibold">ficem123</span>)</span>
+              </p>
             </div>
           )}
         </div>

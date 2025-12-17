@@ -2,12 +2,27 @@
 
 import { User, Mail, Building2, Shield, Key } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function PerfilContent() {
   const { user } = useAuth();
 
   if (!user) return null;
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      ROOT: "Root",
+      ADMIN_PROCESO: "Administrador de Proceso",
+      EJECUTIVO_FICEM: "Ejecutivo FICEM",
+      AMIGO_FICEM: "Amigo FICEM",
+      COORDINADOR_PAIS: "Coordinador de País",
+      SUPERVISOR_EMPRESA: "Supervisor de Empresa",
+      INFORMANTE_EMPRESA: "Informante de Empresa",
+      VISOR_EMPRESA: "Visor de Empresa",
+      public: "Público",
+    };
+    return labels[role] || role;
+  };
 
   return (
     <main className="flex-1 bg-[var(--background-secondary)] min-h-screen">
@@ -38,7 +53,7 @@ function PerfilContent() {
                 <h2 className="text-2xl font-bold text-[var(--primary)]">{user.name}</h2>
                 <p className="text-[var(--foreground-muted)] flex items-center gap-2 mt-1">
                   <Shield className="h-4 w-4" />
-                  {user.role === "admin" ? "Administrador" : "Miembro"}
+                  {getRoleLabel(user.role)}
                 </p>
               </div>
             </div>
@@ -102,7 +117,7 @@ function PerfilContent() {
 
 export default function PerfilPage() {
   return (
-    <ProtectedRoute requiredRole="member">
+    <ProtectedRoute requireAuth={true}>
       <PerfilContent />
     </ProtectedRoute>
   );

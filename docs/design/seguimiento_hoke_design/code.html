@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tracking: Dashboard Principal MRV</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b8cee",
+                        "corporate-blue-dark": "#1B3A5F",
+                        "corporate-blue-medium": "#2E5A8B",
+                        "corporate-blue-light": "#5B9BD5",
+                        "gray-dark": "#4A4A4A",
+                        "gray-medium": "#7A7A7A",
+                        "onudi-green": "#00A651",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-background-dark font-display text-[#111418] dark:text-white h-screen overflow-hidden flex">
+<aside class="w-[280px] bg-white dark:bg-[#1A2632] flex flex-col border-r border-[#e5e7eb] dark:border-[#2d3748] h-full hidden lg:flex shrink-0 z-20">
+<div class="p-6 flex flex-col h-full justify-between">
+<div class="flex flex-col gap-8">
+<div class="flex gap-3 items-center">
+<div class="bg-corporate-blue-dark/10 flex items-center justify-center rounded-lg size-10 text-corporate-blue-dark">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-corporate-blue-dark dark:text-white text-base font-bold leading-tight">Net Zero 2050</h1>
+<p class="text-gray-medium dark:text-[#94a3b8] text-xs font-normal">Admin Portal</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-medium dark:text-[#94a3b8] hover:bg-[#f0f2f4] dark:hover:bg-[#2d3748] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-corporate-blue-dark dark:group-hover:text-white transition-colors">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-corporate-blue-dark/10 text-corporate-blue-dark dark:text-primary" href="#">
+<span class="material-symbols-outlined fill">show_chart</span>
+<span class="text-sm font-bold">Seguimiento MRV</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-medium dark:text-[#94a3b8] hover:bg-[#f0f2f4] dark:hover:bg-[#2d3748] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-corporate-blue-dark dark:group-hover:text-white transition-colors">model_training</span>
+<span class="text-sm font-medium">Simulation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-medium dark:text-[#94a3b8] hover:bg-[#f0f2f4] dark:hover:bg-[#2d3748] transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-corporate-blue-dark dark:group-hover:text-white transition-colors">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 border-t border-[#f0f2f4] dark:border-[#2d3748] mt-4">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAZ61dFly-v9lbQBe3hd9JxePn6xvkq0uoP_4VhZNBBS7wkutde3G1elPUswpAq_PZqcfZ4Pfxehs4hLYuMMlt5uBTDN1BRztXAb7nhjeKZiefkW_heT461xPk5hBc0WUYk_8RFulzPPZIIkAtAq6PKO4YpjxsjlRp41nPIAMwAO3k6kzSufu0trb6ty0mRebkotKfhQkfVPQDdLV-rfZhAFT7OatKLHaXoK-PB4NJrMbFXASj7m4SFjZ9a_ByKCapPH11TDjEy2nx1");'></div>
+<div class="flex flex-col">
+<p class="text-sm font-medium text-corporate-blue-dark dark:text-white">Admin User</p>
+<p class="text-xs text-gray-medium dark:text-[#94a3b8]">FICEM Coordinator</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden relative bg-white">
+<header class="h-16 flex items-center justify-between px-6 lg:px-10 border-b border-[#f0f2f4] dark:border-[#2d3748] bg-white dark:bg-[#1A2632] shrink-0">
+<div class="flex items-center gap-4">
+<button class="lg:hidden p-2 -ml-2 text-gray-medium">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex items-center gap-2 text-gray-medium dark:text-[#94a3b8]">
+<span class="material-symbols-outlined text-corporate-blue-dark">show_chart</span>
+<span class="text-sm font-medium">MRV</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-corporate-blue-dark dark:text-white text-sm font-medium">Dashboard Principal</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center bg-[#f0f2f4] dark:bg-[#2d3748] rounded-lg px-3 py-2 w-64">
+<span class="material-symbols-outlined text-gray-medium dark:text-[#94a3b8] text-[20px]">search</span>
+<input class="bg-transparent border-none outline-none text-sm ml-2 w-full text-corporate-blue-dark dark:text-white placeholder-gray-medium focus:ring-0 p-0" placeholder="Buscar..." type="text"/>
+</div>
+<button class="relative p-2 text-gray-medium dark:text-[#94a3b8] hover:text-corporate-blue-dark transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 size-2 bg-onudi-green rounded-full border-2 border-white dark:border-[#1A2632]"></span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto bg-white dark:bg-background-dark p-6 lg:p-10">
+<div class="max-w-[1200px] mx-auto flex flex-col gap-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6 border-gray-100">
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl md:text-4xl font-bold tracking-tight text-corporate-blue-dark dark:text-white">Sistema de Seguimiento MRV</h1>
+<p class="text-gray-dark dark:text-[#94a3b8] text-base md:text-lg">Plataforma centralizada para el monitoreo, reporte y verificación de emisiones del sector cementero.</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm text-gray-medium">Conectado como <strong>Juan Pérez</strong></span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white dark:bg-[#1A2632] p-6 rounded-xl border border-[#e5e7eb] dark:border-[#2d3748] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-32">
+<p class="text-gray-dark dark:text-[#94a3b8] text-sm font-medium">Empresas Participantes</p>
+<h3 class="text-4xl font-bold text-corporate-blue-light dark:text-corporate-blue-light">4</h3>
+</div>
+<div class="bg-white dark:bg-[#1A2632] p-6 rounded-xl border border-[#e5e7eb] dark:border-[#2d3748] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-32">
+<p class="text-gray-dark dark:text-[#94a3b8] text-sm font-medium">Años Monitoreados</p>
+<h3 class="text-4xl font-bold text-onudi-green dark:text-onudi-green">2024</h3>
+</div>
+<div class="bg-white dark:bg-[#1A2632] p-6 rounded-xl border border-[#e5e7eb] dark:border-[#2d3748] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-32">
+<p class="text-gray-dark dark:text-[#94a3b8] text-sm font-medium">Indicadores Clave</p>
+<h3 class="text-4xl font-bold text-corporate-blue-light dark:text-corporate-blue-light">7</h3>
+</div>
+<div class="bg-white dark:bg-[#1A2632] p-6 rounded-xl border border-[#e5e7eb] dark:border-[#2d3748] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-32">
+<p class="text-gray-dark dark:text-[#94a3b8] text-sm font-medium">Usuarios Activos</p>
+<h3 class="text-4xl font-bold text-onudi-green dark:text-onudi-green">11</h3>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h2 class="text-xl font-bold text-corporate-blue-dark dark:text-white mb-2">Flujo del Proceso MRV</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border border-gray-200 dark:border-[#2d3748] rounded-lg hover:bg-gray-100 dark:hover:bg-[#2d3748]/80 transition-all shadow-sm h-full" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-corporate-blue-dark uppercase tracking-wider">Paso 1</span>
+<span class="material-symbols-outlined text-gray-400 text-lg">lock</span>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Ingreso de Datos</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Carga inicial de información por parte de las plantas.</p>
+<div class="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-300">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</a>
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border border-gray-200 dark:border-[#2d3748] rounded-lg hover:bg-gray-100 dark:hover:bg-[#2d3748]/80 transition-all shadow-sm h-full" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-corporate-blue-dark uppercase tracking-wider">Paso 2</span>
+<span class="material-symbols-outlined text-gray-400 text-lg">lock</span>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Revisión Empresa</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Validación interna por supervisores de la empresa.</p>
+<div class="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-300">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</a>
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border-2 border-onudi-green dark:border-onudi-green rounded-lg shadow-md h-full ring-2 ring-onudi-green/10" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-onudi-green uppercase tracking-wider">Paso 3</span>
+<div class="bg-onudi-green text-white rounded-full p-0.5">
+<span class="material-symbols-outlined text-sm font-bold block">check</span>
+</div>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Envío a FICEM</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Transferencia oficial de datos para revisión técnica.</p>
+<div class="mt-2 text-xs font-medium text-white bg-onudi-green py-1 px-2 rounded w-fit self-start">En Progreso</div>
+<div class="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10 text-onudi-green">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</a>
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border border-gray-200 dark:border-[#2d3748] rounded-lg hover:bg-gray-100 dark:hover:bg-[#2d3748]/80 transition-all shadow-sm h-full opacity-70" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-corporate-blue-dark uppercase tracking-wider">Paso 4</span>
+<span class="material-symbols-outlined text-gray-400 text-lg">lock</span>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Validación FICEM</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Auditoría y conformidad por parte de la federación.</p>
+<div class="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-300">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</a>
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border border-gray-200 dark:border-[#2d3748] rounded-lg hover:bg-gray-100 dark:hover:bg-[#2d3748]/80 transition-all shadow-sm h-full opacity-70" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-corporate-blue-dark uppercase tracking-wider">Paso 5</span>
+<span class="material-symbols-outlined text-gray-400 text-lg">lock</span>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Consolidación</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Agregación de datos a nivel regional.</p>
+<div class="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-300">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</a>
+<a class="group relative flex flex-col p-4 bg-white dark:bg-[#1A2632] border border-gray-200 dark:border-[#2d3748] rounded-lg hover:bg-gray-100 dark:hover:bg-[#2d3748]/80 transition-all shadow-sm h-full opacity-70" href="#">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-corporate-blue-dark uppercase tracking-wider">Paso 6</span>
+<span class="material-symbols-outlined text-gray-400 text-lg">lock</span>
+</div>
+<h3 class="text-sm font-bold text-corporate-blue-dark dark:text-white mb-1 leading-tight">Publicación</h3>
+<p class="text-xs text-gray-dark dark:text-gray-400 line-clamp-2">Divulgación de resultados e informes finales.</p>
+</a>
+</div>
+</div>
+<div class="bg-corporate-blue-medium dark:bg-[#1A2632] rounded-xl overflow-hidden shadow-md relative">
+<div class="absolute inset-0 bg-gradient-to-r from-corporate-blue-dark to-corporate-blue-medium opacity-90"></div>
+<div class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white opacity-5"></div>
+<div class="relative z-10 p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-onudi-green">trending_up</span>
+<h2 class="text-xl font-bold text-white">Trayectorias y Resultados</h2>
+</div>
+<p class="text-blue-100 mb-4 text-sm max-w-2xl">Visualice el impacto de las estrategias de descarbonización y compare escenarios futuros.</p>
+<div class="flex flex-wrap gap-4 text-xs font-medium text-white">
+<div class="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-sm">bar_chart</span>
+                                    Análisis de Tendencias
+                                </div>
+<div class="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-sm">co2</span>
+                                    Emisiones Proyectadas
+                                </div>
+<div class="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-sm">compare_arrows</span>
+                                    Comparativa Regional
+                                </div>
+</div>
+</div>
+<button class="bg-onudi-green hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                            Acceder a Reportes
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h2 class="text-lg font-bold text-gray-dark dark:text-white">Empresas Colaboradoras</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="bg-gray-50 dark:bg-[#1A2632] border border-gray-100 dark:border-[#2d3748] rounded-lg p-6 flex flex-col items-center justify-center text-center gap-2 hover:bg-white hover:shadow-sm transition-all h-32">
+<div class="size-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 font-bold mb-1">H</div>
+<span class="text-sm font-semibold text-gray-dark dark:text-white">Holcim Argentina</span>
+</div>
+<div class="bg-gray-50 dark:bg-[#1A2632] border border-gray-100 dark:border-[#2d3748] rounded-lg p-6 flex flex-col items-center justify-center text-center gap-2 hover:bg-white hover:shadow-sm transition-all h-32">
+<div class="size-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 font-bold mb-1">L</div>
+<span class="text-sm font-semibold text-gray-dark dark:text-white">Loma Negra</span>
+</div>
+<div class="bg-gray-50 dark:bg-[#1A2632] border border-gray-100 dark:border-[#2d3748] rounded-lg p-6 flex flex-col items-center justify-center text-center gap-2 hover:bg-white hover:shadow-sm transition-all h-32">
+<div class="size-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 font-bold mb-1">A</div>
+<span class="text-sm font-semibold text-gray-dark dark:text-white">Avellaneda</span>
+</div>
+<div class="bg-gray-50 dark:bg-[#1A2632] border border-gray-100 dark:border-[#2d3748] rounded-lg p-6 flex flex-col items-center justify-center text-center gap-2 hover:bg-white hover:shadow-sm transition-all h-32">
+<div class="size-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 font-bold mb-1">P</div>
+<span class="text-sm font-semibold text-gray-dark dark:text-white">PCR</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

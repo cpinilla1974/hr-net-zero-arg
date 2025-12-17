@@ -12,17 +12,15 @@ import {
   Info,
   Settings,
   LogOut,
-  Leaf,
   User,
   ChevronDown,
   Shield,
   LogIn,
   TrendingUp,
   Upload,
-  CheckCircle,
-  Monitor,
   GitMerge,
   LineChart,
+  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,50 +28,56 @@ const partnerLogos = [
   { name: "UNIDO", src: "/logos/unido.png" },
   { name: "Net Zero Partnership", src: "/logos/net-zero-partnership.png" },
   { name: "GCCA", src: "/logos/gcca.png" },
-  { name: "FICEM", src: "/logos/ficem.png" },
   { name: "AFCP", src: "/logos/afcp.png" },
 ];
 
 const navItems = [
   { href: "/", label: "Home", icon: Home, requiresAuth: false },
-  { href: "/benchmarking", label: "Benchmarking", icon: BarChart3, requiresAuth: false },
   { href: "/2030", label: "Trayectoria 2030", icon: Target, requiresAuth: false },
   { href: "/2050", label: "Trayectoria 2050", icon: Rocket, requiresAuth: false },
-  { href: "/calculadora", label: "Calculadora", icon: Calculator, requiresAuth: true },
   { href: "/sobre", label: "Sobre", icon: Info, requiresAuth: false },
 ];
 
-// Submenú de Seguimiento basado en roles
+// Submenú de Benchmarking
+const benchmarkingSubMenu = [
+  {
+    href: "/benchmarking",
+    label: "Comparativa Global",
+    icon: BarChart3,
+  },
+  {
+    href: "/calculadora",
+    label: "Calculadora",
+    icon: Calculator,
+    requiresAuth: true,
+  },
+];
+
+// Submenú de Seguimiento basado en roles (Flujo Simplificado)
 const seguimientoSubMenu = [
   {
     href: "/seguimiento/submit-data",
-    label: "Submit Data",
+    label: "Enviar Datos",
     icon: Upload,
-    roles: ["INFORMANTE_EMPRESA", "VISOR_EMPRESA"]
+    roles: ["INFORMANTE_EMPRESA"]
   },
   {
-    href: "/seguimiento/review-approve",
-    label: "Review & Approve",
-    icon: CheckCircle,
-    roles: ["SUPERVISOR_EMPRESA"]
-  },
-  {
-    href: "/seguimiento/monitoring",
-    label: "Monitoring Dashboard",
-    icon: Monitor,
-    roles: ["COORDINADOR_PAIS"]
-  },
-  {
-    href: "/seguimiento/aggregation",
-    label: "National Aggregation",
+    href: "/seguimiento/process",
+    label: "Procesar Reportes",
     icon: GitMerge,
     roles: ["ADMIN_PROCESO"]
   },
   {
-    href: "/seguimiento/trajectories",
-    label: "Trajectories & Results",
+    href: "/seguimiento/results",
+    label: "Resultados",
     icon: LineChart,
-    roles: ["INFORMANTE_EMPRESA", "SUPERVISOR_EMPRESA", "VISOR_EMPRESA", "COORDINADOR_PAIS", "ADMIN_PROCESO"]
+    roles: ["INFORMANTE_EMPRESA", "ADMIN_PROCESO"]
+  },
+  {
+    href: "/seguimiento/metodologia",
+    label: "Metodología",
+    icon: BookOpen,
+    roles: ["INFORMANTE_EMPRESA", "ADMIN_PROCESO"]
   },
 ];
 
@@ -82,6 +86,7 @@ export function Sidebar() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [benchmarkingOpen, setBenchmarkingOpen] = useState(pathname.startsWith("/benchmarking") || pathname === "/calculadora");
   const [seguimientoOpen, setSeguimientoOpen] = useState(pathname.startsWith("/seguimiento"));
 
   const handleLogout = () => {
@@ -101,13 +106,21 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar hidden lg:flex flex-col bg-[#1B3A5F]">
-      {/* Logo */}
+      {/* Logo y Branding */}
       <div className="p-6">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#5B9BD5]">
-            <Leaf className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-22 rounded-md bg-white overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logos/ficem.png"
+              alt="FICEM"
+              className="h-full w-full object-cover"
+            />
           </div>
-          <span className="text-lg font-bold text-white">Net Zero 2050</span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-white leading-tight">Net Zero 2050</span>
+            <span className="text-xs text-white/70 font-medium">Argentina</span>
+          </div>
         </Link>
       </div>
 
@@ -150,10 +163,72 @@ export function Sidebar() {
             );
           })}
 
+          {/* Benchmarking con submenú expandible */}
+          <li>
+            <button
+              onClick={() => setBenchmarkingOpen(!benchmarkingOpen)}
+              className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                pathname.startsWith("/benchmarking") || pathname === "/calculadora"
+                  ? "bg-[#5B9BD5] text-white"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <BarChart3 className="h-5 w-5" />
+              <span className="flex-1 text-left">Benchmarking</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  benchmarkingOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Submenú */}
+            {benchmarkingOpen && (
+              <ul className="mt-1 ml-2 space-y-1">
+                {benchmarkingSubMenu.map((subItem) => {
+                  const isSubActive = pathname === subItem.href;
+                  const SubIcon = subItem.icon;
+                  const isDisabled = subItem.requiresAuth && !isAuthenticated;
+
+                  if (isDisabled) {
+                    return (
+                      <li key={subItem.href}>
+                        <div
+                          className="flex items-center gap-3 rounded-lg pl-11 pr-4 py-2.5 text-sm font-medium text-white/30 cursor-not-allowed"
+                          title="Requiere iniciar sesión"
+                        >
+                          <SubIcon className="h-4 w-4" />
+                          {subItem.label}
+                        </div>
+                      </li>
+                    );
+                  }
+
+                  return (
+                    <li key={subItem.href}>
+                      <Link
+                        href={subItem.href}
+                        className={`flex items-center gap-3 rounded-lg pl-11 pr-4 py-2.5 text-sm font-medium transition-colors ${
+                          isSubActive
+                            ? "bg-[#5B9BD5] text-white"
+                            : "text-white/60 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <SubIcon className="h-4 w-4" />
+                        {subItem.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+
           {/* Seguimiento con submenú expandible */}
           {isAuthenticated && (
             <li>
-              <button
+              <Link
+                href="/seguimiento"
                 onClick={() => setSeguimientoOpen(!seguimientoOpen)}
                 className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                   pathname.startsWith("/seguimiento")
@@ -163,12 +238,21 @@ export function Sidebar() {
               >
                 <TrendingUp className="h-5 w-5" />
                 <span className="flex-1 text-left">Seguimiento</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    seguimientoOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSeguimientoOpen(!seguimientoOpen);
+                  }}
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      seguimientoOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              </Link>
 
               {/* Submenú */}
               {seguimientoOpen && (
@@ -256,7 +340,7 @@ export function Sidebar() {
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-white truncate">{user.name}</p>
-                <p className="text-xs text-white/50 capitalize">{user.role === "admin" ? "Administrador" : "Miembro"}</p>
+                <p className="text-xs text-white/50 capitalize">{user.role === "ADMIN_PROCESO" ? "Administrador" : "Miembro"}</p>
               </div>
               <ChevronDown className={`h-4 w-4 text-white/50 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
             </button>

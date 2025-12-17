@@ -2,12 +2,15 @@
 
 import {
   metas2030,
-  serieHistoricaEmisiones,
+  trayectoriaEmisiones2030,
+  trayectoriaFactorClinker2030,
+  trayectoriaCoprocesamiento2030,
+  trayectoriaBiomasa2030,
+  trayectoriaEficienciaTermica2030,
   desafios2030,
   oportunidades2030,
   medidasHabilitantes2030,
   accionesCompromisos2030,
-  benchmarkingResumen,
 } from "@/lib/data";
 import {
   LineChart,
@@ -17,14 +20,12 @@ import {
   ResponsiveContainer,
   Tooltip,
   CartesianGrid,
-  Legend,
   BarChart,
   Bar,
   Cell,
 } from "recharts";
 import {
   Target,
-  TrendingDown,
   Flame,
   Leaf,
   Factory,
@@ -132,15 +133,93 @@ const desafioIcons: Record<string, React.ElementType> = {
   leaf: Leaf,
 };
 
-export default function Trayectoria2030Page() {
-  // Preparar datos para el gráfico de evolución
-  const datosEvolucion = serieHistoricaEmisiones.map((d) => ({
-    ...d,
-    argentina: d.argentina,
-    lac: d.lac,
-    global: d.global,
-  }));
+// Componente reutilizable para gráficos de trayectoria
+function TrayectoriaChart({
+  data,
+  titulo,
+  unidad,
+  color,
+  domainMin,
+  domainMax,
+  invertir = false,
+}: {
+  data: { año: number; meta: number; real: number | null }[];
+  titulo: string;
+  unidad: string;
+  color: string;
+  domainMin: number;
+  domainMax: number;
+  invertir?: boolean;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-[var(--border)] p-4">
+      <h3 className="text-sm font-semibold text-[var(--primary)] mb-1">{titulo}</h3>
+      <p className="text-xs text-[var(--foreground-muted)] mb-3">
+        {data[0]?.meta} → {data[data.length - 1]?.meta} {unidad}
+      </p>
+      <div className="h-44">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <XAxis dataKey="año" tick={{ fontSize: 10 }} />
+            <YAxis
+              domain={[domainMin, domainMax]}
+              tick={{ fontSize: 10 }}
+              reversed={invertir}
+            />
+            <Tooltip
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="bg-white p-2 rounded-lg shadow-lg border border-[var(--border)] text-xs">
+                      <p className="font-semibold text-[var(--primary)]">{label}</p>
+                      {payload.map((entry, index) => (
+                        <p key={index} style={{ color: entry.color }}>
+                          {entry.name}: {entry.value !== null ? `${entry.value} ${unidad}` : "Pendiente"}
+                        </p>
+                      ))}
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="meta"
+              name="Trayectoria"
+              stroke={color}
+              strokeWidth={2}
+              dot={{ r: 2 }}
+              strokeDasharray="5 5"
+            />
+            <Line
+              type="monotone"
+              dataKey="real"
+              name="Real"
+              stroke="#10B981"
+              strokeWidth={3}
+              dot={{ r: 6, fill: "#10B981", strokeWidth: 2, stroke: "#fff" }}
+              connectNulls={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-2 flex items-center justify-center gap-4 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-4 h-0.5 border-t-2 border-dashed" style={{ borderColor: color }}></div>
+          <span className="text-[var(--foreground-muted)]">Meta</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-4 h-0.5 bg-emerald-500"></div>
+          <span className="text-[var(--foreground-muted)]">Real</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
+export default function Trayectoria2030Page() {
   // Datos para el gráfico de compromisos
   const datosCompromisos = accionesCompromisos2030.map((c) => ({
     area: c.area,
@@ -266,31 +345,71 @@ export default function Trayectoria2030Page() {
             </div>
           </div>
 
-          {/* Gráficos */}
+          {/* Gráficos de Trayectoria por Indicador */}
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--primary)] mb-4">
+              Trayectorias 2023 → 2030
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <TrayectoriaChart
+                data={trayectoriaEmisiones2030}
+                titulo="Emisiones Netas"
+                unidad="kgCO₂/t"
+                color="#EF4444"
+                domainMin={498}
+                domainMax={510}
+                invertir={true}
+              />
+              <TrayectoriaChart
+                data={trayectoriaFactorClinker2030}
+                titulo="Factor Clínker"
+                unidad="%"
+                color="#5B9BD5"
+                domainMin={64}
+                domainMax={68}
+                invertir={true}
+              />
+              <TrayectoriaChart
+                data={trayectoriaCoprocesamiento2030}
+                titulo="Coprocesamiento"
+                unidad="%"
+                color="#10B981"
+                domainMin={6}
+                domainMax={11}
+              />
+              <TrayectoriaChart
+                data={trayectoriaBiomasa2030}
+                titulo="Biomasa"
+                unidad="%"
+                color="#22C55E"
+                domainMin={3}
+                domainMax={6}
+              />
+            </div>
+          </div>
+
+          {/* Gráfico de Eficiencia Térmica (más ancho) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Evolución Histórica */}
-            <div className="bg-white rounded-xl border border-[var(--border)] p-6">
-              <h3 className="text-base font-semibold text-[var(--primary)] mb-1">
-                Evolución de Emisiones
-              </h3>
-              <p className="text-sm text-[var(--foreground-muted)] mb-4">
-                Argentina vs Latinoamérica vs Global (kgCO₂/tcem)
+            <div className="bg-white rounded-xl border border-[var(--border)] p-4">
+              <h3 className="text-sm font-semibold text-[var(--primary)] mb-1">Eficiencia Térmica</h3>
+              <p className="text-xs text-[var(--foreground-muted)] mb-3">
+                3,425 → 3,400 MJ/tCk (menor es mejor)
               </p>
-              <div className="h-72">
+              <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={datosEvolucion} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <LineChart data={trayectoriaEficienciaTermica2030} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="año" tick={{ fontSize: 12 }} />
-                    <YAxis domain={[450, 700]} tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="año" tick={{ fontSize: 10 }} />
+                    <YAxis domain={[3390, 3430]} tick={{ fontSize: 10 }} reversed={true} />
                     <Tooltip
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="bg-white p-3 rounded-lg shadow-lg border border-[var(--border)]">
+                            <div className="bg-white p-2 rounded-lg shadow-lg border border-[var(--border)] text-xs">
                               <p className="font-semibold text-[var(--primary)]">{label}</p>
                               {payload.map((entry, index) => (
-                                <p key={index} className="text-sm" style={{ color: entry.color }}>
-                                  {entry.name}: {entry.value !== null ? `${entry.value} kgCO₂/t` : "N/A"}
+                                <p key={index} style={{ color: entry.color }}>
+                                  {entry.name}: {entry.value !== null ? `${entry.value} MJ/tCk` : "Pendiente"}
                                 </p>
                               ))}
                             </div>
@@ -299,62 +418,56 @@ export default function Trayectoria2030Page() {
                         return null;
                       }}
                     />
-                    <Legend />
                     <Line
                       type="monotone"
-                      dataKey="argentina"
-                      name="Argentina"
-                      stroke="#5B9BD5"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="lac"
-                      name="Latinoamérica"
-                      stroke="#94A3B8"
+                      dataKey="meta"
+                      name="Trayectoria"
+                      stroke="#F59E0B"
                       strokeWidth={2}
-                      dot={{ r: 3 }}
+                      dot={{ r: 2 }}
                       strokeDasharray="5 5"
                     />
                     <Line
                       type="monotone"
-                      dataKey="global"
-                      name="Global"
-                      stroke="#1B3A5F"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      strokeDasharray="3 3"
+                      dataKey="real"
+                      name="Real"
+                      stroke="#10B981"
+                      strokeWidth={3}
+                      dot={{ r: 6, fill: "#10B981", strokeWidth: 2, stroke: "#fff" }}
+                      connectNulls={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 p-3 bg-emerald-50 rounded-lg">
-                <p className="text-sm text-emerald-700">
-                  <strong>Argentina lidera la región</strong> con emisiones {benchmarkingResumen.argentina.vsLatinoamerica}%
-                  menores que el promedio de Latinoamérica y {benchmarkingResumen.argentina.vsGlobal}% menores que el promedio global.
-                </p>
+              <div className="mt-2 flex items-center justify-center gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-0.5 border-t-2 border-dashed border-amber-500"></div>
+                  <span className="text-[var(--foreground-muted)]">Meta</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-0.5 bg-emerald-500"></div>
+                  <span className="text-[var(--foreground-muted)]">Real</span>
+                </div>
               </div>
             </div>
 
             {/* Avance en Compromisos */}
-            <div className="bg-white rounded-xl border border-[var(--border)] p-6">
-              <h3 className="text-base font-semibold text-[var(--primary)] mb-1">
+            <div className="bg-white rounded-xl border border-[var(--border)] p-4">
+              <h3 className="text-sm font-semibold text-[var(--primary)] mb-1">
                 Avance en Compromisos
               </h3>
-              <p className="text-sm text-[var(--foreground-muted)] mb-4">
+              <p className="text-xs text-[var(--foreground-muted)] mb-3">
                 Progreso por área de acción
               </p>
-              <div className="h-72">
+              <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={datosCompromisos}
                     layout="vertical"
-                    margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                    margin={{ top: 5, right: 20, left: 70, bottom: 5 }}
                   >
-                    <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                    <YAxis dataKey="area" type="category" tick={{ fontSize: 11 }} width={75} />
+                    <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} unit="%" />
+                    <YAxis dataKey="area" type="category" tick={{ fontSize: 9 }} width={65} />
                     <Tooltip
                       formatter={(value: number, name: string) => [
                         `${value}%`,
@@ -379,13 +492,13 @@ export default function Trayectoria2030Page() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 flex items-center justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <div className="mt-2 flex items-center justify-center gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                   <span className="text-[var(--foreground-muted)]">Completado</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-[#5B9BD5]" />
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-[#5B9BD5]" />
                   <span className="text-[var(--foreground-muted)]">En progreso</span>
                 </div>
               </div>

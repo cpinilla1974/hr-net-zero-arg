@@ -20,7 +20,7 @@ const mockUsers: MockUser[] = [
     id: "1",
     name: "Administrador AFCP",
     email: "admin@afcp.org.ar",
-    role: "admin",
+    role: "ADMIN_PROCESO",
     organization: "AFCP",
     createdAt: "2024-01-15",
   },
@@ -28,7 +28,7 @@ const mockUsers: MockUser[] = [
     id: "2",
     name: "Usuario Miembro",
     email: "miembro@empresa.com",
-    role: "member",
+    role: "INFORMANTE_EMPRESA",
     organization: "Holcim Argentina",
     createdAt: "2024-03-20",
   },
@@ -36,7 +36,7 @@ const mockUsers: MockUser[] = [
     id: "3",
     name: "María García",
     email: "maria.garcia@lomanegra.com",
-    role: "member",
+    role: "INFORMANTE_EMPRESA",
     organization: "Loma Negra",
     createdAt: "2024-06-10",
   },
@@ -44,7 +44,7 @@ const mockUsers: MockUser[] = [
     id: "4",
     name: "Carlos Rodríguez",
     email: "carlos.rodriguez@avellaneda.com",
-    role: "member",
+    role: "INFORMANTE_EMPRESA",
     organization: "Cementos Avellaneda",
     createdAt: "2024-08-05",
   },
@@ -55,14 +55,26 @@ function AdminContent() {
   const [showAddModal, setShowAddModal] = useState(false);
 
   const getRoleBadge = (role: UserRole) => {
-    const styles = {
-      admin: "bg-purple-100 text-purple-700",
-      member: "bg-blue-100 text-blue-700",
+    const styles: Record<UserRole, string> = {
+      ROOT: "bg-red-100 text-red-700",
+      ADMIN_PROCESO: "bg-purple-100 text-purple-700",
+      EJECUTIVO_FICEM: "bg-indigo-100 text-indigo-700",
+      AMIGO_FICEM: "bg-cyan-100 text-cyan-700",
+      COORDINADOR_PAIS: "bg-blue-100 text-blue-700",
+      SUPERVISOR_EMPRESA: "bg-green-100 text-green-700",
+      INFORMANTE_EMPRESA: "bg-teal-100 text-teal-700",
+      VISOR_EMPRESA: "bg-gray-100 text-gray-700",
       public: "bg-gray-100 text-gray-700",
     };
-    const labels = {
-      admin: "Administrador",
-      member: "Miembro",
+    const labels: Record<UserRole, string> = {
+      ROOT: "Root",
+      ADMIN_PROCESO: "Admin Proceso",
+      EJECUTIVO_FICEM: "Ejecutivo FICEM",
+      AMIGO_FICEM: "Amigo FICEM",
+      COORDINADOR_PAIS: "Coordinador País",
+      SUPERVISOR_EMPRESA: "Supervisor",
+      INFORMANTE_EMPRESA: "Informante",
+      VISOR_EMPRESA: "Visor",
       public: "Público",
     };
     return (
@@ -117,7 +129,7 @@ function AdminContent() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[var(--primary)]">
-                    {users.filter((u) => u.role === "admin").length}
+                    {users.filter((u) => u.role === "ADMIN_PROCESO").length}
                   </p>
                   <p className="text-sm text-[var(--foreground-muted)]">Administradores</p>
                 </div>

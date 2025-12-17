@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Rocket,
-  Factory,
   TrendingDown,
   ChevronDown,
   ChevronRight,
@@ -15,8 +14,6 @@ import {
   Target,
 } from "lucide-react";
 import {
-  AreaChart,
-  Area,
   LineChart,
   Line,
   XAxis,
@@ -25,9 +22,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import {
   kpiData,
@@ -35,14 +29,6 @@ import {
   ejesDescarbonizacion,
 } from "@/lib/data";
 import CascadaInteractiva from "@/components/charts/CascadaInteractiva";
-
-// Datos para gráfico de escenarios
-const escenarioData = [
-  { año: 2023, produccion: 12.6, bau: 6.7, netZero: 6.7 },
-  { año: 2030, produccion: 14.8, bau: 7.8, netZero: 5.8 },
-  { año: 2040, produccion: 17.0, bau: 9.1, netZero: 3.5 },
-  { año: 2050, produccion: 19.5, bau: 10.4, netZero: 0 },
-];
 
 // Timeline data - alineado con documento HR
 const timelineData = [
@@ -102,10 +88,11 @@ export default function Trayectoria2050Page() {
   const [expandedGlobal, setExpandedGlobal] = useState(false);
   const [activeTab, setActiveTab] = useState<"clinker" | "coprocesamiento">("clinker");
   const [selectedEje, setSelectedEje] = useState<typeof ejesDescarbonizacion[0] | null>(null);
+  const [heroExpanded, setHeroExpanded] = useState(true);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* SECCIÓN 1: HERO - El Objetivo */}
+      {/* SECCIÓN 1: HERO - El Objetivo - COLAPSABLE */}
       <section className="relative bg-gradient-to-br from-[#1B3A5F] via-[#2E5A8B] to-[#1B3A5F] text-white overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -113,176 +100,83 @@ export default function Trayectoria2050Page() {
           <div className="absolute bottom-10 right-20 w-96 h-96 rounded-full bg-[#5B9BD5]/30 blur-3xl" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-6 py-20 text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <Rocket className="h-8 w-8 text-[#5B9BD5]" />
-            <span className="text-sm font-medium uppercase tracking-wider text-white/70">
-              Hoja de Ruta Net Zero 2050
-            </span>
+        <div className="relative max-w-6xl mx-auto px-6 py-8">
+          {/* Header Compacto - Siempre visible */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20">
+                <Rocket className="h-6 w-6 text-[#5B9BD5]" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Hoja de Ruta Net Zero 2050
+                </h2>
+                <p className="text-sm text-white/60">
+                  6.7 MtCO₂ → 0 MtCO₂ • Neutralidad de carbono al 2050
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setHeroExpanded(!heroExpanded)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg border border-white/20 transition-colors text-sm font-medium"
+            >
+              {heroExpanded ? "Ocultar objetivo" : "Ver objetivo"}
+              <ChevronDown className={`h-4 w-4 transition-transform ${heroExpanded ? "rotate-180" : ""}`} />
+            </button>
           </div>
 
-          {/* El gran CERO animado */}
-          <div className="relative inline-block mb-8">
-            <div className="text-[180px] md:text-[240px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 animate-pulse">
-              0
-            </div>
-            <div className="absolute inset-0 text-[180px] md:text-[240px] font-black leading-none text-[#5B9BD5]/20 blur-2xl">
-              0
-            </div>
-          </div>
+          {/* Contenido expandible */}
+          {heroExpanded && (
+            <div className="animate-in slide-in-from-top duration-300 text-center">
+              {/* El gran CERO animado */}
+              <div className="relative inline-block mb-8">
+                <div className="text-[180px] md:text-[240px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 animate-pulse">
+                  0
+                </div>
+                <div className="absolute inset-0 text-[180px] md:text-[240px] font-black leading-none text-[#5B9BD5]/20 blur-2xl">
+                  0
+                </div>
+              </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Emisiones Netas de CO₂
-          </h1>
-          <p className="text-xl text-white/80 mb-4">
-            Neutralidad de carbono en cemento y hormigón
-          </p>
-          <p className="text-sm text-white/60 max-w-2xl mx-auto mb-8">
-            Alineada con los objetivos del Acuerdo de París para limitar el aumento de temperatura a 1.5°C
-          </p>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                Emisiones Netas de CO₂
+              </h1>
+              <p className="text-xl text-white/80 mb-4">
+                Neutralidad de carbono en cemento y hormigón
+              </p>
+              <p className="text-sm text-white/60 max-w-2xl mx-auto mb-8">
+                Alineada con los objetivos del Acuerdo de París para limitar el aumento de temperatura a 1.5°C
+              </p>
 
-          {/* Indicador de transición */}
-          <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
-            <div className="text-right">
-              <div className="text-2xl font-bold">{kpiData.emisionesTotales.actual}</div>
-              <div className="text-sm text-white/60">MtCO₂ hoy</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-24 h-1 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full" />
-              <TrendingDown className="h-6 w-6 text-green-400" />
-            </div>
-            <div className="text-left">
-              <div className="text-2xl font-bold">{kpiData.emisionesTotales.meta2050}</div>
-              <div className="text-sm text-white/60">MtCO₂ en 2050</div>
-            </div>
-          </div>
+              {/* Indicador de transición */}
+              <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4 mb-8">
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{kpiData.emisionesTotales.actual}</div>
+                  <div className="text-sm text-white/60">MtCO₂ hoy</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 h-1 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full" />
+                  <TrendingDown className="h-6 w-6 text-green-400" />
+                </div>
+                <div className="text-left">
+                  <div className="text-2xl font-bold">{kpiData.emisionesTotales.meta2050}</div>
+                  <div className="text-sm text-white/60">MtCO₂ en 2050</div>
+                </div>
+              </div>
 
-          {/* Contexto institucional */}
-          <div className="mt-8 text-xs text-white/50">
-            Elaborada por AFCP en conjunto con FICEM, GCCA y ONUDI
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="mt-12 animate-bounce">
-            <ChevronDown className="h-8 w-8 mx-auto text-white/50" />
-          </div>
+              {/* Contexto institucional */}
+              <div className="text-xs text-white/50">
+                Elaborada por AFCP en conjunto con FICEM, GCCA y ONUDI
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* SECCIÓN 2: EL DESAFÍO - Escenario de Emisiones */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">El Desafío de Descarbonización</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              La industria del cemento es fundamental para el desarrollo de infraestructura del país.
-              El desafío es compatibilizar el crecimiento esperado de la demanda con la descarbonización del sector.
-            </p>
-          </div>
-
-          {/* Cards de estadísticas */}
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-8 text-center border border-emerald-200">
-              <Factory className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
-              <div className="text-5xl font-black text-emerald-700 mb-2">+55%</div>
-              <div className="text-lg font-medium text-emerald-800">Crecimiento de producción</div>
-              <div className="text-sm text-emerald-600 mt-2">
-                {kpiData.produccionCemento.actual} Mt → {kpiData.produccionCemento.meta2050} Mt
-              </div>
-              <p className="text-xs text-emerald-600/70 mt-3">
-                Para cerrar el déficit de construcción e infraestructura
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-sky-50 to-sky-100 rounded-2xl p-8 text-center border border-sky-200">
-              <TrendingDown className="h-12 w-12 text-sky-600 mx-auto mb-4" />
-              <div className="text-5xl font-black text-sky-700 mb-2">-100%</div>
-              <div className="text-lg font-medium text-sky-800">Reducción de emisiones</div>
-              <div className="text-sm text-sky-600 mt-2">
-                {kpiData.emisionesTotales.actual} MtCO₂ → 0 MtCO₂ netas
-              </div>
-              <p className="text-xs text-sky-600/70 mt-3">
-                Alineado con el Acuerdo de París
-              </p>
-            </div>
-          </div>
-
-          {/* Gráfico de escenarios BAU vs Net Zero */}
-          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
-              Escenario de Emisiones: BAU vs Net Zero
-            </h3>
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Sin acción (BAU) las emisiones crecerían a 10.4 MtCO₂. La trayectoria Net Zero las lleva a cero.
-            </p>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={escenarioData}>
-                  <defs>
-                    <linearGradient id="colorBAU" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorNetZero" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="año" tick={{ fill: "#6B7280" }} />
-                  <YAxis tick={{ fill: "#6B7280" }} unit=" Mt" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                    formatter={(value: number) => [`${value} MtCO₂`]}
-                  />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="bau"
-                    name="Escenario BAU"
-                    stroke="#EF4444"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    fill="url(#colorBAU)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="netZero"
-                    name="Trayectoria Net Zero"
-                    stroke="#10B981"
-                    strokeWidth={3}
-                    fill="url(#colorNetZero)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-xs text-gray-400 text-center mt-4">
-              BAU = Business as Usual (producir bajo las mismas condiciones actuales)
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN 3: CASCADA INTERACTIVA - Elemento Central */}
+      {/* SECCIÓN 2: CASCADA INTERACTIVA - Elemento Central */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-[#5B9BD5]/10 text-[#1B3A5F] px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Target className="h-4 w-4" />
-              Elemento Central de la Hoja de Ruta
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Cinco Caminos hacia Net Zero</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              La descarbonización se logra a través de 5 grupos de estrategias complementarias.
-              <br />
-              <span className="text-[#5B9BD5] font-medium">Haz clic en cada grupo para explorar sus ejes de acción.</span>
-            </p>
-          </div>
-
           {/* Cascada Interactiva */}
           <CascadaInteractiva onEjeSelect={setSelectedEje} />
 
