@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TrendingDown,
   TrendingUp,
@@ -11,6 +11,8 @@ import {
   BarChart3,
   LineChart as LineChartIcon,
   FileText,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -26,6 +28,8 @@ import {
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { submissionsAPI } from "@/lib/api/submissions";
+import type { Submission } from "@/types/submission";
 
 // Mock data - TODO: Replace with API call
 const mockCompanyResults = {
@@ -107,8 +111,102 @@ function ResultsContent() {
   const [viewMode, setViewMode] = useState<"company" | "national">(
     user?.role === "ADMIN_PROCESO" ? "national" : "company"
   );
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [currentSubmission, setCurrentSubmission] = useState<Submission | null>(null);
+  const [results, setResults] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isAdmin = user?.role === "ADMIN_PROCESO";
+
+  // Cargar submissions y resultados
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const procesoId = "hr-argentina-2024";
+
+        // Cargar submissions
+        const submissionsData = await submissionsAPI.list(procesoId);
+        setSubmissions(submissionsData);
+
+        // Si es admin, cargar todas las submissions aprobadas
+        if (isAdmin && viewMode === "national") {
+          const approvedSubmissions = submissionsData.filter(
+            s => s.estado_actual === "APROBADO_FICEM"
+          );
+          setSubmissions(approvedSubmissions);
+        } else {
+          // Si es empresa, buscar su submission
+          const userSubmission = submissionsData.find(
+            s => s.empresa_id === user?.empresa_id && s.estado_actual === "APROBADO_FICEM"
+          );
+
+          if (userSubmission) {
+            setCurrentSubmission(userSubmission);
+
+            // Intentar cargar resultados
+            try {
+              const resultsData = await submissionsAPI.getResults(userSubmission.id);
+              setResults(resultsData);
+            } catch (err) {
+              console.log("No hay resultados disponibles aún");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error cargando datos:", err);
+        setError("Error al cargar los datos de resultados");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user, isAdmin, viewMode]);
+
+  // Mostrar loading
+  if (isLoading) {
+    return (
+      <main className="flex-1 p-8 bg-gray-50">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-[#5B9BD5] mx-auto mb-4" />
+            <p className="text-gray-600">Cargando resultados...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Mostrar mensaje si no hay datos aprobados
+  if (!isAdmin && !currentSubmission) {
+    return (
+      <main className="flex-1 p-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-black text-gray-900 mb-2">Resultados y Trayectorias</h1>
+            <p className="text-[#5B9BD5] text-base">
+              Visualiza los resultados de tu empresa y el progreso hacia las metas
+            </p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
+            <AlertCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              No hay resultados disponibles aún
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Los resultados estarán disponibles una vez que tu reporte haya sido procesado y aprobado por FICEM.
+            </p>
+            <p className="text-sm text-gray-500">
+              Puedes revisar el estado de tu envío en la sección "Mi Envío".
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 p-8 bg-gray-50">
@@ -122,6 +220,17 @@ function ResultsContent() {
               : "Visualiza los resultados de tu empresa y el progreso hacia las metas"}
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900 mb-1">Error</h3>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
 
         {/* View Mode Selector (Admin Only) */}
         {isAdmin && (

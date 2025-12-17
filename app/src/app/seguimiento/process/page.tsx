@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileSpreadsheet,
   Download,
@@ -11,9 +11,28 @@ import {
   AlertCircle,
   Eye,
   MessageSquare,
+  Loader2,
 } from "lucide-react";
 import { plantillasArchivos, type EstadoReporte } from "@/types/seguimiento";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { submissionsAPI } from "@/lib/api/submissions";
+import type { Submission, EstadoSubmission } from "@/types/submission";
+
+// Mapeo de estados de API a estados de UI
+const mapAPIStateToUI = (estado: EstadoSubmission): EstadoReporte => {
+  switch (estado) {
+    case "BORRADOR":
+      return "BORRADOR";
+    case "ENVIADO":
+    case "EN_REVISION_FICEM":
+      return "ENVIADO";
+    case "APROBADO_FICEM":
+    case "PUBLICADO":
+      return "COMPLETADO";
+    default:
+      return "ENVIADO";
+  }
+};
 
 // Mock data - TODO: Replace with API call
 const mockReports = [
@@ -87,10 +106,34 @@ const mockReports = [
 function ProcessContent() {
   const [filter, setFilter] = useState<EstadoReporte | "ALL">("ALL");
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
+  // Cargar submissions al montar
+  useEffect(() => {
+    const loadSubmissions = async () => {
+      try {
+        setIsLoading(true);
+        const procesoId = "hr-argentina-2024";
+        const data = await submissionsAPI.list(procesoId);
+        setSubmissions(data);
+      } catch (err) {
+        console.error("Error cargando submissions:", err);
+        setError("Error al cargar los reportes");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSubmissions();
+  }, []);
+
+  // Filtrar submissions
   const filteredReports = filter === "ALL"
-    ? mockReports
-    : mockReports.filter(r => r.estado === filter);
+    ? submissions
+    : submissions.filter(s => mapAPIStateToUI(s.estado_actual) === filter);
 
   const getStatusBadge = (estado: EstadoReporte) => {
     const badges = {
@@ -110,13 +153,68 @@ function ProcessContent() {
     );
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("es-AR", {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("es-AR", {
       year: "numeric",
       month: "short",
       day: "numeric"
     });
   };
+
+  const handleStartProcessing = async (submissionId: string) => {
+    try {
+      setIsProcessing(submissionId);
+      await submissionsAPI.aprobarFicem(submissionId, {
+        accion: "en_revision",
+        comentario: "Iniciando procesamiento de datos",
+      });
+
+      // Recargar submissions
+      const procesoId = "hr-argentina-2024";
+      const data = await submissionsAPI.list(procesoId);
+      setSubmissions(data);
+    } catch (err) {
+      console.error("Error procesando submission:", err);
+      setError("Error al iniciar procesamiento");
+    } finally {
+      setIsProcessing(null);
+    }
+  };
+
+  const handleCompleteProcessing = async (submissionId: string) => {
+    try {
+      setIsProcessing(submissionId);
+      await submissionsAPI.aprobarFicem(submissionId, {
+        accion: "aprobar",
+        comentario: "Procesamiento completado exitosamente",
+      });
+
+      // Recargar submissions
+      const procesoId = "hr-argentina-2024";
+      const data = await submissionsAPI.list(procesoId);
+      setSubmissions(data);
+    } catch (err) {
+      console.error("Error completando submission:", err);
+      setError("Error al completar procesamiento");
+    } finally {
+      setIsProcessing(null);
+    }
+  };
+
+  // Mostrar loading
+  if (isLoading) {
+    return (
+      <main className="flex-1 p-8 bg-gray-50">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-[#5B9BD5] mx-auto mb-4" />
+            <p className="text-gray-600">Cargando reportes...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 p-8 bg-gray-50">
@@ -129,6 +227,17 @@ function ProcessContent() {
           </p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <X className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900 mb-1">Error</h3>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -136,7 +245,7 @@ function ProcessContent() {
               <span className="text-gray-600 text-sm font-medium">Total Reportes</span>
               <FileSpreadsheet className="w-5 h-5 text-gray-400" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">{mockReports.length}</p>
+            <p className="text-3xl font-bold text-gray-900">{submissions.length}</p>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -145,17 +254,17 @@ function ProcessContent() {
               <Clock className="w-5 h-5 text-blue-500" />
             </div>
             <p className="text-3xl font-bold text-blue-600">
-              {mockReports.filter(r => r.estado === "ENVIADO").length}
+              {submissions.filter(s => s.estado_actual === "ENVIADO").length}
             </p>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm font-medium">En Proceso</span>
+              <span className="text-gray-600 text-sm font-medium">En Revisión</span>
               <AlertCircle className="w-5 h-5 text-yellow-500" />
             </div>
             <p className="text-3xl font-bold text-yellow-600">
-              {mockReports.filter(r => r.estado === "EN_PROCESO").length}
+              {submissions.filter(s => s.estado_actual === "EN_REVISION_FICEM").length}
             </p>
           </div>
 
@@ -165,7 +274,7 @@ function ProcessContent() {
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
             <p className="text-3xl font-bold text-green-600">
-              {mockReports.filter(r => r.estado === "COMPLETADO").length}
+              {submissions.filter(s => s.estado_actual === "APROBADO_FICEM").length}
             </p>
           </div>
         </div>
@@ -213,78 +322,100 @@ function ProcessContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredReports.map((report) => (
-                  <tr key={report.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="font-bold text-gray-900">{report.empresaNombre}</span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">{report.año}</td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        <p className="font-medium text-gray-900">{report.informante.nombre}</p>
-                        <p className="text-gray-500">{report.informante.email}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700 text-sm">
-                      {formatDate(report.fechaEnvio)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        {report.archivos.GNR && (
-                          <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center" title="GNR">
-                            <FileSpreadsheet className="w-4 h-4 text-blue-600" />
-                          </div>
-                        )}
-                        {report.archivos.ADICIONALES_2030 && (
-                          <div className="w-8 h-8 rounded bg-amber-100 flex items-center justify-center" title="2030">
-                            <FileSpreadsheet className="w-4 h-4 text-amber-600" />
-                          </div>
-                        )}
-                        {report.archivos.ADICIONALES_2050 && (
-                          <div className="w-8 h-8 rounded bg-green-100 flex items-center justify-center" title="2050">
-                            <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">{getStatusBadge(report.estado)}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setSelectedReport(report.id)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Ver Detalle"
-                        >
-                          <Eye className="w-5 h-5" />
-                        </button>
-                        {report.estado === "ENVIADO" && (
-                          <>
-                            <button
-                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Marcar En Proceso"
-                            >
-                              <Check className="w-5 h-5" />
-                            </button>
-                            <button
-                              className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                              title="Agregar Comentario"
-                            >
-                              <MessageSquare className="w-5 h-5" />
-                            </button>
-                          </>
-                        )}
-                        {report.estado === "EN_PROCESO" && (
-                          <button
-                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                            title="Marcar Completado"
-                          >
-                            Completar
-                          </button>
-                        )}
-                      </div>
+                {filteredReports.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                      No hay reportes para mostrar
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredReports.map((submission) => {
+                    const uiState = mapAPIStateToUI(submission.estado_actual);
+                    const hasArchivo = !!submission.archivo_excel;
+
+                    return (
+                      <tr key={submission.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <span className="font-bold text-gray-900">
+                            {submission.empresa_nombre || `Empresa ${submission.empresa_id}`}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-700">2024</td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm">
+                            <p className="font-medium text-gray-900">Usuario {submission.usuario_id}</p>
+                            <p className="text-gray-500">—</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-700 text-sm">
+                          {formatDate(submission.submitted_at || submission.created_at)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            {hasArchivo ? (
+                              <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center" title={submission.archivo_excel?.filename}>
+                                <FileSpreadsheet className="w-4 h-4 text-blue-600" />
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-sm">Sin archivos</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">{getStatusBadge(uiState)}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setSelectedReport(submission.id)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Ver Detalle"
+                            >
+                              <Eye className="w-5 h-5" />
+                            </button>
+                            {submission.estado_actual === "ENVIADO" && (
+                              <>
+                                <button
+                                  onClick={() => handleStartProcessing(submission.id)}
+                                  disabled={isProcessing === submission.id}
+                                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Iniciar Procesamiento"
+                                >
+                                  {isProcessing === submission.id ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                  ) : (
+                                    <Check className="w-5 h-5" />
+                                  )}
+                                </button>
+                                <button
+                                  className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                  title="Agregar Comentario"
+                                >
+                                  <MessageSquare className="w-5 h-5" />
+                                </button>
+                              </>
+                            )}
+                            {submission.estado_actual === "EN_REVISION_FICEM" && (
+                              <button
+                                onClick={() => handleCompleteProcessing(submission.id)}
+                                disabled={isProcessing === submission.id}
+                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                title="Aprobar y Completar"
+                              >
+                                {isProcessing === submission.id ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Procesando...
+                                  </>
+                                ) : (
+                                  "Completar"
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
