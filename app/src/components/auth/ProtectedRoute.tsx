@@ -7,13 +7,13 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: UserRole;
+  allowedRoles?: UserRole[];
   requireAuth?: boolean;
 }
 
-export function ProtectedRoute({
+export default function ProtectedRoute({
   children,
-  requiredRole,
+  allowedRoles,
   requireAuth = true,
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -26,22 +26,11 @@ export function ProtectedRoute({
         return;
       }
 
-      if (requiredRole) {
-        const roleHierarchy: Record<UserRole, number> = {
-          public: 0,
-          member: 1,
-          admin: 2,
-        };
-
-        const userRoleLevel = user ? roleHierarchy[user.role] : 0;
-        const requiredRoleLevel = roleHierarchy[requiredRole];
-
-        if (userRoleLevel < requiredRoleLevel) {
-          router.push("/");
-        }
+      if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        router.push("/");
       }
     }
-  }, [isLoading, isAuthenticated, user, requiredRole, requireAuth, router]);
+  }, [isLoading, isAuthenticated, user, allowedRoles, requireAuth, router]);
 
   if (isLoading) {
     return (
@@ -52,22 +41,23 @@ export function ProtectedRoute({
   }
 
   if (requireAuth && !isAuthenticated) {
-    return null;
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Debes iniciar sesión para acceder a esta página</p>
+        </div>
+      </div>
+    );
   }
 
-  if (requiredRole && user) {
-    const roleHierarchy: Record<UserRole, number> = {
-      public: 0,
-      member: 1,
-      admin: 2,
-    };
-
-    const userRoleLevel = roleHierarchy[user.role];
-    const requiredRoleLevel = roleHierarchy[requiredRole];
-
-    if (userRoleLevel < requiredRoleLevel) {
-      return null;
-    }
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No tienes permisos para acceder a esta página</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

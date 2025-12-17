@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Users, UserPlus, Shield, Mail, Building2, Trash2, Edit2 } from "lucide-react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { UserRole } from "@/contexts/AuthContext";
 
 interface MockUser {
@@ -286,7 +286,7 @@ function AdminContent() {
 
 export default function AdminPage() {
   return (
-    <ProtectedRoute requiredRole="admin">
+    <ProtectedRoute allowedRoles={["ADMIN_PROCESO"]}>
       <AdminContent />
     </ProtectedRoute>
   );

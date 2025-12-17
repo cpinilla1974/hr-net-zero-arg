@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { RotateCcw, XCircle, CheckCircle } from "lucide-react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { emisionesDetalladas, matrizCombustibles } from "@/lib/data";
 
 // Factores de emisión oficiales (fuente: GCCA/FICEM Argentina)
