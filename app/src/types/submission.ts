@@ -23,12 +23,15 @@ export interface Submission {
   usuario_id: number;
   estado_actual: EstadoSubmission;
 
-  // Archivo Excel
-  archivo_excel?: {
+  // Archivos Excel (uno por planta)
+  archivos_excel?: Array<{
+    planta_id: number;
+    planta_nombre?: string;
     url: string;
     filename: string;
+    size_bytes: number;
     uploaded_at: string;
-  };
+  }>;
 
   // Validaciones
   validaciones?: Array<{

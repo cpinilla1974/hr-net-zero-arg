@@ -49,6 +49,8 @@ const COLORS = {
 };
 
 // Indicadores disponibles
+// hasComparison: true = tiene datos internacionales para comparar
+// hasComparison: false = solo datos de Argentina (sin comparación internacional)
 const INDICATORS = [
   {
     id: "net_co2_kg_cement",
@@ -57,6 +59,7 @@ const INDICATORS = [
     icon: TrendingDown,
     color: "#5B9BD5",
     multiplier: 1,
+    hasComparison: true,
   },
   {
     id: "clinker_cement_ratio",
@@ -65,6 +68,7 @@ const INDICATORS = [
     icon: Factory,
     color: "#1B3A5F",
     multiplier: 100,
+    hasComparison: true,
   },
   {
     id: "thermal_energy_mj_clinker",
@@ -73,6 +77,7 @@ const INDICATORS = [
     icon: Flame,
     color: "#F59E0B",
     multiplier: 1,
+    hasComparison: true,
   },
   {
     id: "electric_kwh_cement",
@@ -81,6 +86,7 @@ const INDICATORS = [
     icon: Zap,
     color: "#8B5CF6",
     multiplier: 1,
+    hasComparison: true,
   },
   {
     id: "alternative_fuel_rate",
@@ -89,6 +95,7 @@ const INDICATORS = [
     icon: Leaf,
     color: "#10B981",
     multiplier: 100,
+    hasComparison: false, // Solo datos de Argentina
   },
   {
     id: "biomass_rate",
@@ -97,6 +104,7 @@ const INDICATORS = [
     icon: Globe,
     color: "#EC4899",
     multiplier: 100,
+    hasComparison: false, // Solo datos de Argentina
   },
 ];
 
@@ -218,16 +226,20 @@ export default function BenchmarkingPage() {
     fetchData();
   }, []);
 
-  // Cargar años disponibles desde Argentina
+  // Cargar años disponibles desde Argentina para el indicador seleccionado
   useEffect(() => {
     const fetchAvailableYears = async () => {
       try {
-        const res = await fetch('/api/benchmarking?action=time_series&indicator=net_co2_kg_cement&regions=Argentina');
+        const res = await fetch(`/api/benchmarking?action=time_series&indicator=${selectedIndicator}&regions=Argentina`);
         if (res.ok) {
           const data = await res.json();
           const argentinaData = data.series?.Argentina || [];
           const years = argentinaData.map((d: { year: number }) => d.year).sort((a: number, b: number) => b - a);
           setAvailableYears(years);
+          // Si el año seleccionado no está disponible, seleccionar el más reciente
+          if (years.length > 0 && !years.includes(selectedYear)) {
+            setSelectedYear(years[0]);
+          }
         }
       } catch (error) {
         console.error("Error fetching available years:", error);
@@ -235,7 +247,7 @@ export default function BenchmarkingPage() {
     };
 
     fetchAvailableYears();
-  }, []);
+  }, [selectedIndicator]);
 
   // Cargar datos del indicador seleccionado y valores de Argentina
   useEffect(() => {
@@ -342,24 +354,25 @@ export default function BenchmarkingPage() {
               Comparativa de indicadores GNR 1990-2023
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-[var(--primary)]" />
-            <span className="text-sm font-medium text-[var(--primary)]">Año:</span>
-            <select
+            <span className="text-sm text-[var(--foreground-muted)]">
+              {availableYears.length > 0 ? availableYears[availableYears.length - 1] : 1990}
+            </span>
+            <input
+              type="range"
+              min={availableYears.length > 0 ? availableYears[availableYears.length - 1] : 1990}
+              max={availableYears.length > 0 ? availableYears[0] : 2023}
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent font-medium"
-            >
-              {availableYears.length > 0 ? (
-                availableYears.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))
-              ) : (
-                [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010].map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))
-              )}
-            </select>
+              className="w-32 sm:w-48 h-2 bg-[var(--border)] rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
+            />
+            <span className="text-sm text-[var(--foreground-muted)]">
+              {availableYears.length > 0 ? availableYears[0] : 2023}
+            </span>
+            <span className="ml-2 px-3 py-1 bg-[var(--accent)] text-white text-sm font-bold rounded-lg min-w-[4rem] text-center">
+              {selectedYear}
+            </span>
           </div>
         </div>
       </div>
@@ -409,7 +422,27 @@ export default function BenchmarkingPage() {
               </p>
             </div>
             <div className="h-[500px] w-full">
-              {indicatorComparison && indicatorComparison.length > 0 ? (
+              {/* Verificar si el indicador tiene datos de comparación internacional */}
+              {!INDICATORS.find(i => i.id === selectedIndicator)?.hasComparison ? (
+                <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 max-w-md">
+                    <Leaf className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-amber-800 mb-2">
+                      Solo datos de Argentina disponibles
+                    </h3>
+                    <p className="text-sm text-amber-700 mb-4">
+                      El indicador &quot;{INDICATORS.find(i => i.id === selectedIndicator)?.name}&quot; actualmente solo tiene datos reportados por Argentina.
+                      No hay datos internacionales de comparación en la base GNR para este indicador.
+                    </p>
+                    <div className="bg-white rounded-lg p-4 border border-amber-200">
+                      <p className="text-xs text-[var(--foreground-muted)] mb-1">Valor Argentina ({selectedYear})</p>
+                      <p className="text-2xl font-bold text-[var(--primary)]">
+                        {argentinaValues[selectedIndicator]?.toFixed(1) || '—'} {INDICATORS.find(i => i.id === selectedIndicator)?.unit}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : indicatorComparison && indicatorComparison.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
                     data={indicatorComparison

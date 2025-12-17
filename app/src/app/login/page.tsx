@@ -132,7 +132,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setEmail("ficem@ficem.org");
-                    setPassword("ficem123");
+                    setPassword("demo123");
                   }}
                   className="w-full text-left px-3 py-2 rounded-md bg-white border border-[#E5E7EB] hover:border-[#5B9BD5] hover:bg-[#5B9BD5]/5 transition-colors text-xs"
                 >
@@ -305,8 +305,6 @@ export default function LoginPage() {
               </div>
               <p className="text-[10px] text-[#6B7280] mt-2">
                 Contraseña: <span className="font-mono font-semibold">demo123</span>
-                <br />
-                <span className="text-[9px]">(Admin FICEM usa: <span className="font-mono font-semibold">ficem123</span>)</span>
               </p>
             </div>
           )}

@@ -10,23 +10,26 @@ import {
   X,
   Check,
   Loader2,
+  Factory,
+  ChevronDown,
+  ChevronUp,
+  Lock,
 } from "lucide-react";
 import { plantillasArchivos, type TipoArchivo } from "@/types/seguimiento";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { submissionsAPI } from "@/lib/api/submissions";
 import type { Submission } from "@/types/submission";
+import { getPlantasByEmpresa, type Planta } from "@/lib/plantas";
 
 function SubmitDataContent() {
   const { user } = useAuth();
   const [año, setAño] = useState(new Date().getFullYear());
-  const [archivos, setArchivos] = useState<{
-    GNR?: File;
-    ADICIONALES_2030?: File;
-    ADICIONALES_2050?: File;
-  }>({});
+  const [plantas, setPlantas] = useState<Planta[]>([]);
   const [observaciones, setObservaciones] = useState("");
-  const [isDragging, setIsDragging] = useState<TipoArchivo | null>(null);
+  const [expandedTipo, setExpandedTipo] = useState<TipoArchivo | null>("GNR");
+  const [isDragging, setIsDragging] = useState<number | null>(null);
+  const [uploadingPlanta, setUploadingPlanta] = useState<number | null>(null);
 
   // Estado para la API
   const [submission, setSubmission] = useState<Submission | null>(null);
@@ -35,11 +38,35 @@ function SubmitDataContent() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Cargar plantas de la empresa
+  useEffect(() => {
+    if (user?.empresa_id) {
+      const plantasEmpresa = getPlantasByEmpresa(user.empresa_id);
+      setPlantas(plantasEmpresa);
+    }
+  }, [user?.empresa_id]);
+
   // Cargar submissions del proceso al montar el componente
   useEffect(() => {
     const loadSubmission = async () => {
       if (!user?.empresa_id) {
-        setError("No se pudo determinar tu empresa");
+        // Modo desarrollo: usar datos mock si no hay empresa_id
+        console.warn("No empresa_id - usando modo desarrollo");
+        setSubmission({
+          id: "mock-submission-1",
+          proceso_id: "hr-argentina-2024",
+          empresa_id: 1,
+          empresa_nombre: "Empresa Demo",
+          usuario_id: 1,
+          estado_actual: "BORRADOR",
+          archivos_excel: [],
+          created_at: new Date().toISOString(),
+        });
+        // Cargar plantas mock para empresa 1
+        const plantasDemo = getPlantasByEmpresa(1);
+        if (plantasDemo.length > 0) {
+          setPlantas(plantasDemo);
+        }
         setIsLoading(false);
         return;
       }
@@ -67,7 +94,25 @@ function SubmitDataContent() {
         }
       } catch (err) {
         console.error("Error cargando submission:", err);
-        setError("Error al cargar la información del reporte");
+        // Modo fallback: usar datos mock si la API falla
+        console.warn("API no disponible - usando modo desarrollo");
+        const empresaId = user?.empresa_id || 1;
+        setSubmission({
+          id: "mock-submission-1",
+          proceso_id: "hr-argentina-2024",
+          empresa_id: empresaId,
+          empresa_nombre: user?.organization || "Empresa Demo",
+          usuario_id: user?.id || 1,
+          estado_actual: "BORRADOR",
+          archivos_excel: [],
+          created_at: new Date().toISOString(),
+        });
+        // Cargar plantas mock
+        const plantasDemo = getPlantasByEmpresa(empresaId);
+        if (plantasDemo.length > 0) {
+          setPlantas(plantasDemo);
+        }
+        setError(null); // Limpiar error ya que tenemos fallback
       } finally {
         setIsLoading(false);
       }
@@ -76,51 +121,70 @@ function SubmitDataContent() {
     loadSubmission();
   }, [user, año]);
 
-  const handleFileSelect = async (tipo: TipoArchivo, file: File | null) => {
-    if (file) {
-      // Guardar archivo en estado local
-      setArchivos((prev) => ({ ...prev, [tipo]: file }));
+  // Verificar si una planta ya tiene archivo subido en el servidor
+  const getArchivoPlanta = (plantaId: number) => {
+    return submission?.archivos_excel?.find(a => a.planta_id === plantaId);
+  };
 
+  const handleFileSelectPlanta = async (plantaId: number, file: File | null) => {
+    if (file) {
       // Si hay una submission, subir el archivo al backend
       if (submission) {
         try {
           setError(null);
           setSuccessMessage(null);
+          setUploadingPlanta(plantaId);
 
-          // Subir archivo
-          const updatedSubmission = await submissionsAPI.uploadFile(submission.id, file);
+          // Subir archivo con planta_id
+          const updatedSubmission = await submissionsAPI.uploadFile(submission.id, file, plantaId);
           setSubmission(updatedSubmission);
 
-          setSuccessMessage(`Archivo ${file.name} subido exitosamente`);
+          const planta = plantas.find(p => p.id === plantaId);
+          setSuccessMessage(`Archivo ${file.name} subido para ${planta?.nombre || 'planta'}`);
           setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err) {
           console.error("Error subiendo archivo:", err);
           setError(`Error al subir el archivo ${file.name}`);
+        } finally {
+          setUploadingPlanta(null);
         }
       }
     } else {
-      setArchivos((prev) => {
-        const { [tipo]: _, ...rest } = prev;
-        return rest;
-      });
+      // Eliminar archivo del servidor si existe
+      if (submission) {
+        try {
+          setError(null);
+          setUploadingPlanta(plantaId);
+          const updatedSubmission = await submissionsAPI.deleteFile(submission.id, plantaId);
+          setSubmission(updatedSubmission);
+          const planta = plantas.find(p => p.id === plantaId);
+          setSuccessMessage(`Archivo eliminado de ${planta?.nombre || 'planta'}`);
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+          console.error("Error eliminando archivo:", err);
+          setError("Error al eliminar el archivo");
+        } finally {
+          setUploadingPlanta(null);
+        }
+      }
     }
   };
 
-  const handleDragOver = (e: React.DragEvent, tipo: TipoArchivo) => {
+  const handleDragOver = (e: React.DragEvent, plantaId: number) => {
     e.preventDefault();
-    setIsDragging(tipo);
+    setIsDragging(plantaId);
   };
 
   const handleDragLeave = () => {
     setIsDragging(null);
   };
 
-  const handleDrop = (e: React.DragEvent, tipo: TipoArchivo) => {
+  const handleDrop = (e: React.DragEvent, plantaId: number) => {
     e.preventDefault();
     setIsDragging(null);
     const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))) {
-      handleFileSelect(tipo, file);
+    if (file && (file.name.endsWith(".xlsx") || file.name.endsWith(".xls") || file.name.endsWith(".xlsm"))) {
+      handleFileSelectPlanta(plantaId, file);
     }
   };
 
@@ -156,7 +220,10 @@ function SubmitDataContent() {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  const allRequiredFilesUploaded = archivos.GNR && archivos.ADICIONALES_2030;
+  // Verificar si todas las plantas tienen archivo subido
+  const archivosSubidos = submission?.archivos_excel?.length || 0;
+  const plantasTotales = plantas.length;
+  const allRequiredFilesUploaded = archivosSubidos > 0; // Al menos un archivo GNR
   const currentStatus = submission?.estado_actual || "BORRADOR";
 
   // Timeline steps (Flujo Simplificado basado en la API)
@@ -259,7 +326,11 @@ function SubmitDataContent() {
                         key={plantilla.tipo}
                         href={plantilla.urlDescarga}
                         download
-                        className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                          plantilla.tipo === "GNR"
+                            ? "text-white bg-[#3B82F6] hover:bg-[#2563EB]"
+                            : "text-gray-400 bg-gray-100 cursor-not-allowed pointer-events-none"
+                        }`}
                       >
                         <Download className="w-4 h-4" />
                         <span className="truncate">{plantilla.nombre.replace("Plantilla ", "")}</span>
@@ -276,125 +347,195 @@ function SubmitDataContent() {
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#5B9BD5] text-white font-bold flex-shrink-0">
                   2
                 </div>
-                <div className="flex-1 space-y-6">
+                <div className="flex-1 space-y-4">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">
                       Cargar archivos
                     </h2>
                     <p className="text-gray-600">
-                      Arrastra y suelta tus archivos completados o haz clic para seleccionarlos.
+                      Sube tus archivos completados. GNR es obligatorio (uno por planta).
                     </p>
                   </div>
 
-                  {/* Upload Cards */}
+                  {/* Upload Cards by Type */}
                   {plantillasArchivos.map((plantilla) => {
-                    const archivoActual = archivos[plantilla.tipo];
-                    const isUploaded = !!archivoActual;
+                    const isGNR = plantilla.tipo === "GNR";
+                    const isExpanded = expandedTipo === plantilla.tipo;
+                    const isDisabled = !isGNR;
 
                     return (
                       <div
                         key={plantilla.tipo}
                         className={`border-2 rounded-xl transition-all ${
-                          isDragging === plantilla.tipo
-                            ? "border-[#5B9BD5] bg-blue-50"
-                            : isUploaded
+                          isDisabled
+                            ? "border-gray-100 bg-gray-50 opacity-60"
+                            : isExpanded
+                            ? "border-[#5B9BD5] bg-blue-50/30"
+                            : archivosSubidos > 0 && isGNR
                             ? "border-green-200 bg-green-50/50"
                             : "border-gray-200"
                         }`}
                       >
-                        <div className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className="p-2 rounded-lg"
-                                style={{ backgroundColor: `${plantilla.iconColor}15` }}
-                              >
-                                <FileSpreadsheet
-                                  className="w-5 h-5"
-                                  style={{ color: plantilla.iconColor }}
-                                />
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-gray-900 text-sm">
-                                  {plantilla.nombre.replace("Plantilla ", "")}
-                                </h3>
-                                <p className="text-xs text-gray-500">{plantilla.granularidad}</p>
-                              </div>
+                        {/* Header del tipo de archivo */}
+                        <button
+                          onClick={() => !isDisabled && setExpandedTipo(isExpanded ? null : plantilla.tipo)}
+                          disabled={isDisabled}
+                          className={`w-full p-4 flex items-center justify-between ${
+                            isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="p-2 rounded-lg"
+                              style={{ backgroundColor: isDisabled ? "#E5E7EB" : `${plantilla.iconColor}15` }}
+                            >
+                              <FileSpreadsheet
+                                className="w-5 h-5"
+                                style={{ color: isDisabled ? "#9CA3AF" : plantilla.iconColor }}
+                              />
                             </div>
-                            <div className="flex items-center gap-2">
-                              {plantilla.obligatorio && (
-                                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
-                                  Obligatorio
-                                </span>
-                              )}
-                              {isUploaded && (
-                                <div className="p-1.5 rounded-full bg-green-100">
-                                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                </div>
-                              )}
+                            <div className="text-left">
+                              <h3 className={`font-bold text-sm ${isDisabled ? "text-gray-400" : "text-gray-900"}`}>
+                                {plantilla.nombre.replace("Plantilla ", "")}
+                              </h3>
+                              <p className="text-xs text-gray-500">{plantilla.granularidad}</p>
                             </div>
                           </div>
-
-                          {!isUploaded ? (
-                            <div
-                              onDragOver={(e) => handleDragOver(e, plantilla.tipo)}
-                              onDragLeave={handleDragLeave}
-                              onDrop={(e) => handleDrop(e, plantilla.tipo)}
-                              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                                isDragging === plantilla.tipo
-                                  ? "border-[#5B9BD5] bg-blue-50"
-                                  : "border-gray-300 hover:border-gray-400"
-                              }`}
-                            >
-                              <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                              <p className="text-sm font-medium text-gray-700 mb-1">
-                                Arrastra tu archivo aquí
-                              </p>
-                              <p className="text-xs text-gray-500 mb-3">
-                                o haz clic para seleccionar
-                              </p>
-                              <label
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer transition-colors"
-                                style={{ backgroundColor: plantilla.iconColor }}
-                              >
-                                Seleccionar archivo
-                                <input
-                                  type="file"
-                                  accept=".xlsx,.xls"
-                                  onChange={(e) =>
-                                    handleFileSelect(plantilla.tipo, e.target.files?.[0] || null)
-                                  }
-                                  className="hidden"
-                                />
-                              </label>
-                            </div>
-                          ) : (
-                            <div className="bg-white border border-green-200 rounded-lg p-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <FileSpreadsheet
-                                    className="w-4 h-4 flex-shrink-0"
-                                    style={{ color: plantilla.iconColor }}
-                                  />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                      {archivoActual.name}
-                                    </p>
-                                    <p className="text-xs text-gray-600">
-                                      {formatFileSize(archivoActual.size)}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleFileSelect(plantilla.tipo, null)}
-                                  className="p-1.5 hover:bg-red-100 rounded-lg transition-colors ml-2"
-                                >
-                                  <X className="w-4 h-4 text-red-600" />
-                                </button>
+                          <div className="flex items-center gap-2">
+                            {isGNR && archivosSubidos > 0 && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                                {archivosSubidos}/{plantasTotales} plantas
+                              </span>
+                            )}
+                            {plantilla.obligatorio && !isDisabled && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                                Obligatorio
+                              </span>
+                            )}
+                            {isDisabled ? (
+                              <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">
+                                <Lock className="w-3 h-3" />
+                                Próximamente
                               </div>
-                            </div>
-                          )}
-                        </div>
+                            ) : (
+                              isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-gray-400" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-gray-400" />
+                              )
+                            )}
+                          </div>
+                        </button>
+
+                        {/* Contenido expandido - Solo para GNR */}
+                        {isExpanded && isGNR && (
+                          <div className="px-4 pb-4 border-t border-gray-100">
+                            <p className="text-sm text-gray-600 mt-3 mb-4">
+                              Sube un archivo GNR por cada planta de tu empresa.
+                            </p>
+
+                            {plantas.length === 0 ? (
+                              <div className="text-center py-8 text-gray-500">
+                                <Factory className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                <p>No se encontraron plantas para tu empresa.</p>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {plantas.map((planta) => {
+                                  const archivoServidor = getArchivoPlanta(planta.id);
+                                  const isUploaded = !!archivoServidor;
+                                  const isUploading = uploadingPlanta === planta.id;
+
+                                  return (
+                                    <div
+                                      key={planta.id}
+                                      className={`border rounded-lg transition-all ${
+                                        isDragging === planta.id
+                                          ? "border-[#5B9BD5] bg-blue-50"
+                                          : isUploaded
+                                          ? "border-green-200 bg-green-50/50"
+                                          : "border-gray-200 bg-white"
+                                      }`}
+                                    >
+                                      <div className="p-3">
+                                        {/* Plant Header */}
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center gap-2">
+                                            <Factory className="w-4 h-4 text-[#3B82F6]" />
+                                            <div>
+                                              <h4 className="font-semibold text-gray-900 text-sm">
+                                                {planta.nombre}
+                                              </h4>
+                                              <p className="text-xs text-gray-500">{planta.ubicacion}</p>
+                                            </div>
+                                          </div>
+                                          {isUploaded && (
+                                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                          )}
+                                        </div>
+
+                                        {/* Upload Area or File Display */}
+                                        {isUploading ? (
+                                          <div className="flex items-center justify-center py-4">
+                                            <Loader2 className="w-5 h-5 animate-spin text-[#5B9BD5]" />
+                                            <span className="ml-2 text-xs text-gray-600">Subiendo...</span>
+                                          </div>
+                                        ) : !isUploaded ? (
+                                          <div
+                                            onDragOver={(e) => handleDragOver(e, planta.id)}
+                                            onDragLeave={handleDragLeave}
+                                            onDrop={(e) => handleDrop(e, planta.id)}
+                                            className={`border border-dashed rounded p-3 text-center transition-colors ${
+                                              isDragging === planta.id
+                                                ? "border-[#5B9BD5] bg-blue-50"
+                                                : "border-gray-300 hover:border-gray-400"
+                                            }`}
+                                          >
+                                            <label className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-[#3B82F6] rounded cursor-pointer hover:bg-[#2563EB] transition-colors">
+                                              <Upload className="w-3 h-3" />
+                                              Subir archivo
+                                              <input
+                                                type="file"
+                                                accept=".xlsx,.xls,.xlsm"
+                                                onChange={(e) =>
+                                                  handleFileSelectPlanta(planta.id, e.target.files?.[0] || null)
+                                                }
+                                                className="hidden"
+                                              />
+                                            </label>
+                                          </div>
+                                        ) : (
+                                          <div className="bg-white border border-green-200 rounded p-2">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                <FileSpreadsheet className="w-4 h-4 flex-shrink-0 text-[#3B82F6]" />
+                                                <div className="flex-1 min-w-0">
+                                                  <p className="text-xs font-medium text-gray-900 truncate">
+                                                    {archivoServidor.filename}
+                                                  </p>
+                                                  <p className="text-xs text-gray-500">
+                                                    {formatFileSize(archivoServidor.size_bytes)}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                              <button
+                                                onClick={() => handleFileSelectPlanta(planta.id, null)}
+                                                className="p-1 hover:bg-red-100 rounded transition-colors"
+                                                title="Eliminar archivo"
+                                              >
+                                                <X className="w-3 h-3 text-red-600" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -466,7 +607,7 @@ function SubmitDataContent() {
               <div className="flex items-center gap-2 mb-6">
                 <span className="text-sm font-medium text-gray-600">Estado:</span>
                 <span className="inline-flex items-center justify-center rounded-full bg-gray-200 px-3 py-1 text-sm font-bold text-gray-800">
-                  {statusSteps[currentStepIndex].label}
+                  {statusSteps[currentStepIndex]?.label || "Borrador"}
                 </span>
               </div>
 

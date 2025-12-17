@@ -331,7 +331,8 @@ function ProcessContent() {
                 ) : (
                   filteredReports.map((submission) => {
                     const uiState = mapAPIStateToUI(submission.estado_actual);
-                    const hasArchivo = !!submission.archivo_excel;
+                    const archivosCount = submission.archivos_excel?.length || 0;
+                    const hasArchivo = archivosCount > 0;
 
                     return (
                       <tr key={submission.id} className="hover:bg-gray-50 transition-colors">
@@ -353,7 +354,7 @@ function ProcessContent() {
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             {hasArchivo ? (
-                              <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center" title={submission.archivo_excel?.filename}>
+                              <div className="w-8 h-8 rounded bg-blue-100 flex items-center justify-center" title={`${archivosCount} archivo(s)`}>
                                 <FileSpreadsheet className="w-4 h-4 text-blue-600" />
                               </div>
                             ) : (

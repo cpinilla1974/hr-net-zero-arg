@@ -35,7 +35,6 @@ const navItems = [
   { href: "/", label: "Home", icon: Home, requiresAuth: false },
   { href: "/2030", label: "Trayectoria 2030", icon: Target, requiresAuth: false },
   { href: "/2050", label: "Trayectoria 2050", icon: Rocket, requiresAuth: false },
-  { href: "/sobre", label: "Sobre", icon: Info, requiresAuth: false },
 ];
 
 // Submenú de Benchmarking
@@ -86,8 +85,8 @@ export function Sidebar() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [benchmarkingOpen, setBenchmarkingOpen] = useState(pathname.startsWith("/benchmarking") || pathname === "/calculadora");
-  const [seguimientoOpen, setSeguimientoOpen] = useState(pathname.startsWith("/seguimiento"));
+  const [benchmarkingOpen, setBenchmarkingOpen] = useState(false);
+  const [seguimientoOpen, setSeguimientoOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -303,6 +302,21 @@ export function Sidebar() {
             </Link>
           </div>
         )}
+
+        {/* Sobre - Al final */}
+        <div className="mt-4 pt-4 border-t border-white/10">
+          <Link
+            href="/sobre"
+            className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+              pathname === "/sobre"
+                ? "bg-[#5B9BD5] text-white"
+                : "text-white/70 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Info className="h-5 w-5" />
+            Sobre
+          </Link>
+        </div>
       </nav>
 
       {/* Logos de socios */}

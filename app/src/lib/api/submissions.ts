@@ -17,10 +17,10 @@ export const submissionsAPI = {
    * GET /api/v1/procesos/{proceso_id}/submissions
    */
   list: async (procesoId: string): Promise<Submission[]> => {
-    const response = await apiClient.get<SubmissionListResponse>(
+    const response = await apiClient.get<{ total: number; items: Submission[] }>(
       `/procesos/${procesoId}/submissions`
     );
-    return response.submissions;
+    return response.items;
   },
 
   /**
@@ -43,17 +43,17 @@ export const submissionsAPI = {
   },
 
   /**
-   * Subir archivo Excel
-   * POST /api/v1/submissions/{id}/upload
+   * Subir archivo Excel para una planta específica
+   * POST /api/v1/submissions/{id}/upload?planta_id={planta_id}
    */
-  uploadFile: async (id: string, file: File): Promise<Submission> => {
+  uploadFile: async (id: string, file: File, plantaId: number): Promise<Submission> => {
     const formData = new FormData();
     formData.append("archivo", file);
 
     // Para FormData, necesitamos hacer el fetch manualmente
     const token = localStorage.getItem("token");
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/submissions/${id}/upload`,
+      `${process.env.NEXT_PUBLIC_API_URL}/submissions/${id}/upload?planta_id=${plantaId}`,
       {
         method: "POST",
         headers: {
@@ -68,6 +68,14 @@ export const submissionsAPI = {
     }
 
     return response.json();
+  },
+
+  /**
+   * Eliminar archivo de una planta
+   * DELETE /api/v1/submissions/{id}/archivos/{planta_id}
+   */
+  deleteFile: async (id: string, plantaId: number): Promise<Submission> => {
+    return apiClient.delete(`/submissions/${id}/archivos/${plantaId}`);
   },
 
   /**
