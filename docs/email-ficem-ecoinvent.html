@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Factores de Emisión Ecoinvent - FICEM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a5490;
+            border-bottom: 3px solid #1a5490;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2c5f8d;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        h3 {
+            color: #3d7ab3;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        th {
+            background-color: #1a5490;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .priority-high {
+            color: #d9534f;
+            font-weight: 600;
+        }
+        .priority-very-high {
+            color: #c82333;
+            font-weight: 700;
+        }
+        .priority-medium {
+            color: #f0ad4e;
+            font-weight: 600;
+        }
+        .highlight-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #1a5490;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #f0ad4e;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        ul, ol {
+            margin: 10px 0 10px 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .bullet-item {
+            margin-left: 20px;
+            padding-left: 10px;
+        }
+        .section-number {
+            display: inline-block;
+            background-color: #1a5490;
+            color: white;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .parameter-card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .parameter-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #1a5490;
+            margin-bottom: 10px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .greeting {
+            margin-bottom: 30px;
+            font-size: 1.05em;
+        }
+        .signature {
+            margin-top: 40px;
+            font-size: 1.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Análisis Completo - Factores de Emisión Ecoinvent para Calculadoras FICEM</h1>
+
+        <div class="greeting">
+            <p>Estimados Ricardo y Eduardo,</p>
+            <p>Les comparto el análisis completo de los factores de emisión de Ecoinvent requeridos para las calculadoras de CO2 de cemento y concreto (2-c y 3-c), siguiendo la reunión coordinada con Johann Leopold y la información recibida de Francisco Vidal (ecoinvent).</p>
+        </div>
+
+        <h2>Resumen Ejecutivo</h2>
+        <p>Hemos identificado los requerimientos técnicos y comerciales para adquirir la <strong>Licencia Developer de Ecoinvent v3.10</strong>, necesaria para incorporar factores de emisión estandarizados en las calculadoras FICEM aplicables a toda América Latina.</p>
+
+        <div class="highlight-box">
+            <h3>Parámetros de Cotización</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Valor Propuesto</th>
+                        <th>Justificación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tool Users</strong></td>
+                        <td>50-80 usuarios</td>
+                        <td>Personal técnico de ~15-20 empresas cementeras FICEM (~3-4 usuarios/empresa: ingenieros ambientales, técnicos de planta, gerentes de sostenibilidad)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Indicators</strong></td>
+                        <td>1 indicador</td>
+                        <td>GWP100 (IPCC 2021) - Las calculadoras solo requieren huella de carbono</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Datasets</strong></td>
+                        <td>50 factores</td>
+                        <td>Ver desglose por categoría abajo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Datasets Identificados: 48-55 factores de emisión</h2>
+        <p>Basado en el análisis de las calculadoras 2-c (cemento) y 3-c (concreto), y alineado con iniciativas de descarbonización regional como la Hoja de Ruta Net Zero 2050:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                    <th>Aplicación</th>
+                    <th>Prioridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Materias primas clínker</td>
+                    <td>7-9</td>
+                    <td>Producción cemento</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+                <tr>
+                    <td>Adiciones cementantes</td>
+                    <td>3</td>
+                    <td>Cementos compuestos</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+                <tr>
+                    <td>Combustibles fósiles convencionales</td>
+                    <td>6</td>
+                    <td>Horno clínker</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+                <tr>
+                    <td><strong>CDR Fósiles (coprocesamiento)</strong></td>
+                    <td><strong>7</strong></td>
+                    <td><strong>Combustibles alternativos</strong></td>
+                    <td class="priority-very-high">MUY ALTA</td>
+                </tr>
+                <tr>
+                    <td><strong>Biomasa y residuos orgánicos</strong></td>
+                    <td><strong>11</strong></td>
+                    <td><strong>Economía circular</strong></td>
+                    <td class="priority-very-high">MUY ALTA</td>
+                </tr>
+                <tr>
+                    <td>Hidrógeno</td>
+                    <td>2</td>
+                    <td>Combustible futuro (2040-2050)</td>
+                    <td class="priority-medium">Media</td>
+                </tr>
+                <tr>
+                    <td>Transporte</td>
+                    <td>2-3</td>
+                    <td>Logística materiales</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+                <tr>
+                    <td>Agregados concreto</td>
+                    <td>3</td>
+                    <td>Solo calculadora 3-c</td>
+                    <td class="priority-medium">Media</td>
+                </tr>
+                <tr>
+                    <td>Electricidad y agua</td>
+                    <td>2-3</td>
+                    <td>Utilidades planta</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+                <tr>
+                    <td>Gestión residuos proceso</td>
+                    <td>3</td>
+                    <td>Alcance A3</td>
+                    <td class="priority-high">Alta</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="success-box">
+            <p><strong>Total: 48-55 datasets únicos → Propuesta: 50 datasets para cotización inicial</strong></p>
+        </div>
+
+        <h2>Cobertura de Materiales Clave</h2>
+
+        <div class="parameter-card">
+            <div class="parameter-title">🔥 Combustibles Alternativos (CDR Fósiles) - 7 datasets</div>
+            <p><strong>Aplicación:</strong> Coprocesamiento y valorización energética</p>
+            <ul>
+                <li>Aceite usado (waste oil)</li>
+                <li>Neumáticos fuera de uso (tyres)</li>
+                <li>RDF incluyendo plásticos no reciclables</li>
+                <li>Solventes industriales</li>
+                <li>Residuos industriales mixtos</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title">🌱 Biomasa y Economía Circular - 11 datasets</div>
+            <p><strong>Aplicación:</strong> Combustibles renovables y captura de metano</p>
+            <ul>
+                <li>Lodos de depuradora secos</li>
+                <li>Madera no impregnada / aserrín</li>
+                <li>Papel y cartón reciclado</li>
+                <li>Harinas animales (animal meal, bone meal)</li>
+                <li>Residuos agrícolas y forestales</li>
+                <li>RSU fracción orgánica</li>
+                <li><strong>Créditos de metano evitado:</strong> Captura de metano de rellenos sanitarios (crédito negativo por evitar CH₄)</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title">⚙️ Materias Primas y Combustibles Tradicionales</div>
+            <ul>
+                <li><strong>Minerales:</strong> Caliza, arcilla, sílice, óxido de hierro</li>
+                <li><strong>Adiciones:</strong> Escoria de alto horno, ceniza volante, yeso</li>
+                <li><strong>Combustibles:</strong> Carbón, petcoke, gas natural, diesel, fuel oil</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title">🚛 Transporte y Utilidades</div>
+            <ul>
+                <li><strong>Transporte:</strong> Camión >32t, barco transoceánico</li>
+                <li><strong>Energía:</strong> Electricidad red (por país LAC), agua industrial</li>
+            </ul>
+        </div>
+
+        <h3>Cobertura Geográfica</h3>
+        <div class="highlight-box">
+            <p><strong>Prioridad 1:</strong> LAC (Latin America), RoLA (Rest of Latin America), datasets por país cuando estén disponibles</p>
+            <p><strong>Prioridad 2:</strong> GLO (Global), RER (Europa) como respaldo</p>
+            <p><em>Esto garantiza precisión para el contexto regional latinoamericano y aplicabilidad en múltiples países FICEM.</em></p>
+        </div>
+
+        <h2>Sistema de Facturación Ecoinvent</h2>
+        <div class="warning-box">
+            <p><strong>⚠️ IMPORTANTE - Modelo de pago con ajuste retroactivo:</strong></p>
+            <ol>
+                <li><strong>Primera factura:</strong> Basada en valores estimados (50-80 usuarios, 1 indicador, 50 datasets)</li>
+                <li><strong>Durante el contrato:</strong> Se debe llevar <strong>REGISTRO OBLIGATORIO</strong> de:
+                    <ul>
+                        <li>Usuarios activos nominalmente identificados</li>
+                        <li>Datasets efectivamente utilizados</li>
+                        <li>Indicadores accedidos</li>
+                    </ul>
+                </li>
+                <li><strong>Final del año:</strong> Reporte de uso real a Ecoinvent
+                    <ul>
+                        <li>Si se excedieron los valores estimados → <strong>FACTURACIÓN RETROACTIVA</strong></li>
+                        <li>Nueva cotización para el siguiente año basada en uso real</li>
+                    </ul>
+                </li>
+            </ol>
+            <p><strong>Recomendación:</strong> Comenzar con valores conservadores (50 usuarios, 50 datasets) y ajustar según uso real.</p>
+        </div>
+
+        <h2>Costos Estimados</h2>
+        <div class="warning-box">
+            <p><strong>⚠️ Ecoinvent no provee precios públicos.</strong> Según el email de Francisco Vidal:</p>
+            <ul>
+                <li>Estructura de precios basada en los 3 parámetros mencionados</li>
+                <li><strong>No ofrecen descuentos</strong> (confirmado por Johann Leopold)</li>
+                <li>Pago anual anticipado</li>
+                <li>Contrato renovable anualmente</li>
+            </ul>
+            <p><em>Para obtener cotización formal, debemos enviar la solicitud con los parámetros especificados.</em></p>
+        </div>
+
+        <h2>Casos de Uso - Aplicaciones FICEM</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Aplicación</th>
+                    <th>Uso Principal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Calculadora 2-c<br>(Cemento y Clínker)</strong></td>
+                    <td>
+                        • EPDs (Environmental Product Declarations)<br>
+                        • Reportes GNR/GCCA (Getting the Numbers Right)<br>
+                        • Certificaciones ambientales
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Calculadora 3-c<br>(Concreto y Hormigón)</strong></td>
+                    <td>
+                        • Análisis de mezclas de concreto<br>
+                        • Comparación de formulaciones con diferentes agregados/aditivos<br>
+                        • Optimización de huella de carbono
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Hojas de Ruta<br>Net Zero Regional</strong></td>
+                    <td>
+                        • Datos de referencia para simulaciones de descarbonización<br>
+                        • Modelado de escenarios 2030-2050<br>
+                        • Alineación con compromisos NDC nacionales
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Materiales Sin Factor Ecoinvent Identificado</h2>
+        <p>Identificamos <strong>4 materiales</strong> que requieren confirmación con Ecoinvent sobre datasets alternativos o proxies:</p>
+        <ol>
+            <li><strong>Puzolana natural</strong> (actualmente con factor por defecto 0.00906 kg CO₂/kg)</li>
+            <li><strong>Fluorita</strong> (factor por defecto 50.89 kg CO₂/kg - valor parece excesivamente alto)</li>
+            <li><strong>Chamota</strong> (factor por defecto 0.011 kg CO₂/kg)</li>
+            <li><strong>Diatomita</strong> (factor por defecto 0.044 kg CO₂/kg)</li>
+        </ol>
+        <p><em>Estos se consultarán en la solicitud formal a ecoinvent.</em></p>
+
+        <h2>Próximos Pasos Propuestos</h2>
+
+        <div class="parameter-card">
+            <div class="parameter-title"><span class="section-number">1</span>Revisión FICEM (Esta semana)</div>
+            <ul>
+                <li>Validar número de usuarios objetivo (¿50-80 es correcto?)</li>
+                <li>Confirmar lista de 50 datasets prioritarios</li>
+                <li>Aprobar borrador de email a ecoinvent</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title"><span class="section-number">2</span>Envío a Ecoinvent (Próxima semana)</div>
+            <ul>
+                <li>Email formal a Francisco Vidal solicitando cotización</li>
+                <li>Adjuntar documento técnico con lista completa de datasets</li>
+                <li>Preguntas específicas sobre datasets faltantes y disponibilidad LAC</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title"><span class="section-number">3</span>Evaluación de Cotización (2-3 semanas)</div>
+            <ul>
+                <li>Análisis de propuesta económica</li>
+                <li>Negociación si corresponde</li>
+                <li>Aprobación y firma de contrato</li>
+            </ul>
+        </div>
+
+        <div class="parameter-card">
+            <div class="parameter-title"><span class="section-number">4</span>Implementación (1 mes)</div>
+            <ul>
+                <li>Activación de licencia</li>
+                <li>Integración técnica en calculadoras 2-c y 3-c</li>
+                <li>Capacitación interna</li>
+            </ul>
+        </div>
+
+        <h2>Archivos Adjuntos</h2>
+        <ol>
+            <li><strong>propuesta-respuesta-ecoinvent.txt</strong> - Borrador de email formal a Francisco Vidal (en inglés) listo para enviar tras su aprobación</li>
+            <li><strong>factores-emision-ecoinvent-requeridos.pdf</strong> - Documento técnico completo con lista detallada de 50 datasets, nombres específicos de procesos Ecoinvent, y justificación técnica</li>
+        </ol>
+
+        <h2>Recomendaciones Finales</h2>
+        <div class="success-box">
+            <ol>
+                <li><strong>Usuarios conservadores:</strong> Proponer 50 usuarios inicialmente (vs. 80) para minimizar costo base y ajustar al año siguiente según uso real</li>
+                <li><strong>Datasets completos:</strong> Mantener 50 datasets para cubrir todos los escenarios de las calculadoras, incluyendo coprocesamiento y biomasa</li>
+                <li><strong>Prioridad LAC:</strong> Enfatizar en la solicitud la necesidad de datasets regionales para América Latina</li>
+                <li><strong>Cláusula de ajuste:</strong> Asegurar que el contrato permita agregar datasets adicionales durante el año si se identifican necesidades</li>
+            </ol>
+        </div>
+
+        <div class="signature">
+            <p>Quedo a disposición para coordinar una reunión si requieren discutir algún aspecto técnico o comercial antes de proceder con Ecoinvent.</p>
+            <p>Saludos cordiales,</p>
+            <p><strong>Carlos Pinilla</strong><br>
+            Omniscien<br>
+            <a href="mailto:cpinilla@omniscien.com">cpinilla@omniscien.com</a></p>
+        </div>
+
+        <div class="footer">
+            <p><em>Este documento consolida el análisis técnico de las calculadoras 2-c (cemento) y 3-c (concreto) desarrolladas para FICEM, identificando factores de emisión de Ecoinvent necesarios para implementación regional en América Latina.</em></p>
+        </div>
+    </div>
+</body>
+</html>
