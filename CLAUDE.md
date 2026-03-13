@@ -53,20 +53,10 @@ hr-arg/
 
 ---
 
-## Gestión de Sesiones de Trabajo
+## Sesiones de Trabajo
 
-### Al iniciar una sesión:
-1. Revisar archivos en `/docs/sesiones/` para entender el contexto y progreso anterior
-2. **IMPORTANTE**: Verificar si ya existe un archivo de sesión para la fecha actual antes de crear uno nuevo
-3. Si existe, actualizar ese archivo. Si no existe, crear con formato: `sesion_YYYY-MM-DD.md`
-4. **NUNCA sobrescribir ni eliminar archivos de sesión existentes**
-
-### Al finalizar una sesión:
-1. Actualizar el archivo de sesión con:
-   - Trabajo realizado
-   - Decisiones tomadas
-   - Próximos pasos identificados
-2. Guardar cambios antes de terminar
+- `/ultima-sesion` - Leer última sesión documentada
+- `/documentar-sesion` - Documentar trabajo de la sesión actual
 
 ---
 
