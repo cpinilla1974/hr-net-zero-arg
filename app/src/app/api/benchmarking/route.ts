@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import path from 'path';
 
-// Inicializar la base de datos
-const dbPath = path.join(process.cwd(), 'data', 'benchmarking.db');
+// Ruta configurable via variable de entorno DATABASE_PATH
+const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'benchmarking.db');
 
 interface IndicatorRow {
   region: string;
