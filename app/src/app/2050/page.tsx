@@ -28,10 +28,11 @@ import {
   gruposDescarbonizacion,
   ejesDescarbonizacion,
 } from "@/lib/data";
+import { useTrayectoria, ultimoAnio } from "@/lib/useIndicadores";
 import CascadaInteractiva from "@/components/charts/CascadaInteractiva";
 
-// Timeline data - alineado con documento HR
-const timelineData = [
+// Timeline data - los valores de línea base se sobreescriben con datos de BD en el componente
+const timelineDataBase = [
   {
     año: 2023,
     titulo: "Línea Base",
@@ -89,6 +90,35 @@ export default function Trayectoria2050Page() {
   const [activeTab, setActiveTab] = useState<"clinker" | "coprocesamiento">("clinker");
   const [selectedEje, setSelectedEje] = useState<typeof ejesDescarbonizacion[0] | null>(null);
   const [heroExpanded, setHeroExpanded] = useState(true);
+  const { serie } = useTrayectoria();
+  const ultimo = serie ? ultimoAnio(serie) : null;
+
+  // Datos dinámicos del último año disponible
+  const emisionesTotalesMt = ultimo
+    ? Math.round((ultimo.emisiones_netas * (ultimo.produccion_mt * 1e6) / 1e9) * 10) / 10
+    : kpiData.emisionesTotales.actual;
+  const anioActual = ultimo?.anio ?? 2023;
+  const emisionesKg = ultimo?.emisiones_netas ?? 507;
+  const factorClinker = ultimo?.factor_clinker ?? 67;
+  const tsr = ultimo?.tsr ?? 7;
+  const produccionMt = ultimo?.produccion_mt ?? 12.6;
+
+  // Timeline con datos dinámicos en la línea base
+  const timelineData = timelineDataBase.map((item) => {
+    if (item.año === 2023) {
+      return {
+        ...item,
+        emisiones: `${emisionesKg} kgCO₂/tcem`,
+        indicadores: [
+          `Factor Clínker: ${factorClinker}%`,
+          `Coprocesamiento: ${tsr}%`,
+          `Producción: ${produccionMt} Mt`,
+        ],
+        contexto: `${Math.round(((612 - emisionesKg) / 612) * 100)}% por debajo de 1990`,
+      };
+    }
+    return item;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,7 +142,7 @@ export default function Trayectoria2050Page() {
                   Hoja de Ruta Net Zero 2050
                 </h2>
                 <p className="text-sm text-white/60">
-                  6.7 MtCO₂ → 0 MtCO₂ • Neutralidad de carbono al 2050
+                  {emisionesTotalesMt} MtCO₂ → 0 MtCO₂ • Neutralidad de carbono al 2050
                 </p>
               </div>
             </div>
@@ -152,8 +182,8 @@ export default function Trayectoria2050Page() {
               {/* Indicador de transición */}
               <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4 mb-8">
                 <div className="text-right">
-                  <div className="text-2xl font-bold">{kpiData.emisionesTotales.actual}</div>
-                  <div className="text-sm text-white/60">MtCO₂ hoy</div>
+                  <div className="text-2xl font-bold">{emisionesTotalesMt}</div>
+                  <div className="text-sm text-white/60">MtCO₂ ({anioActual})</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-24 h-1 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full" />

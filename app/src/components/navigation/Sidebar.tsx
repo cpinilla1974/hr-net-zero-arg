@@ -21,6 +21,7 @@ import {
   GitMerge,
   LineChart,
   BookOpen,
+  Database,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -286,19 +287,30 @@ export function Sidebar() {
           )}
         </ul>
 
-        {/* Admin link */}
-        {user?.role === "ADMIN_PROCESO" && (
-          <div className="mt-4 pt-4 border-t border-white/10">
+        {/* Admin links */}
+        {(user?.role === "ADMIN_PROCESO" || user?.role === "COORDINADOR_PAIS") && (
+          <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
             <Link
               href="/admin"
               className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                pathname === "/admin"
+                pathname === "/admin" && !pathname.includes("/admin/")
                   ? "bg-[#5B9BD5] text-white"
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               }`}
             >
               <Shield className="h-5 w-5" />
               Administración
+            </Link>
+            <Link
+              href="/admin/cargar-datos"
+              className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                pathname === "/admin/cargar-datos"
+                  ? "bg-[#5B9BD5] text-white"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Database className="h-5 w-5" />
+              Cargar Datos
             </Link>
           </div>
         )}

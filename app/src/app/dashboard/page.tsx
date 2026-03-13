@@ -2,6 +2,7 @@
 
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { kpiData, gruposDescarbonizacion, comparativaEmisiones } from "@/lib/data";
+import { useTrayectoria, ultimoAnio } from "@/lib/useIndicadores";
 import {
   XAxis,
   YAxis,
@@ -13,20 +14,38 @@ import {
   Legend,
 } from "recharts";
 
-// Datos de evolución de emisiones históricas
-const evolucionEmisiones = comparativaEmisiones.map((d) => ({
-  año: d.año.toString(),
-  argentina: d.argentina,
-  lac: d.lac,
-  global: d.global,
-}));
-
 export default function DashboardPage() {
-  // Calcular progreso: desde 612 (1990) hasta 0 (2050), actualmente en 507
+  const { serie } = useTrayectoria();
+
+  // Datos dinámicos del último año disponible, con fallback a data.ts
+  const ultimo = serie ? ultimoAnio(serie) : null;
+  const emisionActual = ultimo?.emisiones_netas ?? kpiData.emisionesEspecificas.actual;
+  const factorClinkerActual = ultimo?.factor_clinker ?? kpiData.factorClinker.actual;
+  const eficienciaTermicaActual = ultimo?.eficiencia_termica ?? kpiData.eficienciaTermica.actual;
+  const tsrActual = ultimo?.tsr ?? kpiData.coprocesamiento.actual;
+
+  // Calcular progreso: desde 612 (1990) hasta 0 (2050), actualmente en valor real
   const emisionBase = 612;
-  const emisionActual = kpiData.emisionesEspecificas.actual;
   const reduccionLograda = ((emisionBase - emisionActual) / emisionBase) * 100;
   const progresoTotal = Math.round(reduccionLograda);
+
+  // Comparativa internacional: enriquecer con datos históricos reales si hay
+  const evolucionEmisiones = comparativaEmisiones.map((d) => {
+    const punto: Record<string, string | number | null> = {
+      año: d.año.toString(),
+      argentina: d.argentina,
+      lac: d.lac,
+      global: d.global,
+    };
+    // Si tenemos datos reales de la API para este año, sobreescribir Argentina
+    if (serie) {
+      const real = serie.find((s) => s.anio === d.año);
+      if (real) {
+        punto.argentina = real.emisiones_netas;
+      }
+    }
+    return punto;
+  });
 
   return (
     <main className="flex-1 bg-[var(--background-secondary)] min-h-screen">
@@ -72,12 +91,12 @@ export default function DashboardPage() {
             {/* KPI 1: Emisiones */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
               <p className="text-sm text-[var(--foreground-muted)] mb-2">Emisiones Netas</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.emisionesEspecificas.actual}</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{emisionActual}</p>
               <p className="text-lg text-[var(--foreground-muted)]">kgCO₂/t cemento</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowDown className="h-4 w-4 text-[var(--success)]" />
                 <span className="text-[var(--success)] text-sm font-medium">
-                  {kpiData.emisionesEspecificas.reduccionVs1990}% vs 1990
+                  {Math.round(((emisionBase - emisionActual) / emisionBase) * 100)}% vs 1990
                 </span>
               </div>
             </div>
@@ -85,7 +104,7 @@ export default function DashboardPage() {
             {/* KPI 2: Factor Clínker */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
               <p className="text-sm text-[var(--foreground-muted)] mb-2">Factor Clínker</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.factorClinker.actual}%</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{factorClinkerActual}%</p>
               <p className="text-sm text-[var(--foreground-muted)]">Meta 2050: {kpiData.factorClinker.meta2050}%</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowDown className="h-4 w-4 text-[var(--success)]" />
@@ -98,7 +117,7 @@ export default function DashboardPage() {
             {/* KPI 3: Eficiencia Térmica */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
               <p className="text-sm text-[var(--foreground-muted)] mb-2">Eficiencia Térmica</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.eficienciaTermica.actual}</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{eficienciaTermicaActual}</p>
               <p className="text-lg text-[var(--foreground-muted)]">MJ/t clínker</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowDown className="h-4 w-4 text-[var(--success)]" />
@@ -111,7 +130,7 @@ export default function DashboardPage() {
             {/* KPI 4: Coprocesamiento */}
             <div className="bg-white rounded-xl border border-[var(--border)] p-5">
               <p className="text-sm text-[var(--foreground-muted)] mb-2">Coprocesamiento</p>
-              <p className="text-3xl font-bold text-[var(--primary)]">{kpiData.coprocesamiento.actual}%</p>
+              <p className="text-3xl font-bold text-[var(--primary)]">{tsrActual}%</p>
               <p className="text-sm text-[var(--foreground-muted)]">Meta 2050: {kpiData.coprocesamiento.meta2050}%</p>
               <div className="flex items-center gap-1 mt-3">
                 <ArrowUp className="h-4 w-4 text-[var(--success)]" />

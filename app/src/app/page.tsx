@@ -17,9 +17,13 @@ import {
   Landmark,
 } from "lucide-react";
 import { benchmarkingResumen, gruposDescarbonizacion } from "@/lib/data";
+import { useTrayectoria, ultimoAnio } from "@/lib/useIndicadores";
 
 export default function Home() {
   const [heroExpanded, setHeroExpanded] = useState(false);
+  const { serie } = useTrayectoria();
+  const ultimo = serie ? ultimoAnio(serie) : null;
+  const emisionesNetas = ultimo?.emisiones_netas ?? benchmarkingResumen.argentina.emisionesNetas;
 
   return (
     <main className="flex-1 bg-white">
@@ -43,7 +47,7 @@ export default function Home() {
                   Net Zero Argentina 2050
                 </h2>
                 <p className="text-sm text-white/60">
-                  Argentina: Líder en Descarbonización • 495 kgCO₂/tcem vs 598 global
+                  Argentina: Líder en Descarbonización • {emisionesNetas} kgCO₂/tcem vs 598 global
                 </p>
               </div>
             </div>
@@ -114,7 +118,7 @@ export default function Home() {
                     </div>
                     <div className="mt-6 flex items-end gap-4">
                       <div className="flex flex-col gap-1 w-1/2">
-                        <span className="text-4xl font-extrabold text-white">{benchmarkingResumen.argentina.emisionesNetas}</span>
+                        <span className="text-4xl font-extrabold text-white">{emisionesNetas}</span>
                         <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
                           <div className="h-full bg-green-400 w-[82%]"></div>
                         </div>

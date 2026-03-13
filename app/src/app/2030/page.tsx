@@ -12,6 +12,7 @@ import {
   medidasHabilitantes2030,
   accionesCompromisos2030,
 } from "@/lib/data";
+import { useTrayectoria, ultimoAnio } from "@/lib/useIndicadores";
 import {
   LineChart,
   Line,
@@ -219,7 +220,69 @@ function TrayectoriaChart({
   );
 }
 
+// Inyectar datos reales de la API en las trayectorias de data.ts
+function enriquecerTrayectoria(
+  trayectoria: { año: number; meta: number; real: number | null }[],
+  valoresPorAnio: Map<number, number>,
+): { año: number; meta: number; real: number | null }[] {
+  return trayectoria.map((punto) => {
+    const valorReal = valoresPorAnio.get(punto.año);
+    return {
+      ...punto,
+      real: valorReal !== undefined ? valorReal : punto.real,
+    };
+  });
+}
+
 export default function Trayectoria2030Page() {
+  const { serie } = useTrayectoria();
+
+  // Construir mapas de valores reales por año para cada indicador
+  const emisionesMap = new Map<number, number>();
+  const factorClinkerMap = new Map<number, number>();
+  const tsrMap = new Map<number, number>();
+  const biomasaMap = new Map<number, number>();
+  const eficienciaMap = new Map<number, number>();
+
+  if (serie) {
+    for (const s of serie) {
+      emisionesMap.set(s.anio, s.emisiones_netas);
+      factorClinkerMap.set(s.anio, s.factor_clinker);
+      tsrMap.set(s.anio, s.tsr);
+      biomasaMap.set(s.anio, s.biomasa_pct);
+      eficienciaMap.set(s.anio, s.eficiencia_termica);
+    }
+  }
+
+  // Trayectorias enriquecidas con datos reales de la BD
+  const trayEmisiones = enriquecerTrayectoria(trayectoriaEmisiones2030, emisionesMap);
+  const trayFactorClinker = enriquecerTrayectoria(trayectoriaFactorClinker2030, factorClinkerMap);
+  const trayCoprocesamiento = enriquecerTrayectoria(trayectoriaCoprocesamiento2030, tsrMap);
+  const trayBiomasa = enriquecerTrayectoria(trayectoriaBiomasa2030, biomasaMap);
+  const trayEficiencia = enriquecerTrayectoria(trayectoriaEficienciaTermica2030, eficienciaMap);
+
+  // KPIs con datos actuales de la API (fallback a data.ts)
+  const ultimo = serie ? ultimoAnio(serie) : null;
+  const kpiActual = {
+    factorClinker: ultimo?.factor_clinker ?? metas2030.factorClinker.actual,
+    coprocesamiento: ultimo?.tsr ?? metas2030.coprocesamiento.actual,
+    biomasa: ultimo?.biomasa_pct ?? metas2030.biomasa.actual,
+    eficienciaTermica: ultimo?.eficiencia_termica ?? metas2030.eficienciaTermica.actual,
+    emisiones: ultimo?.emisiones_netas ?? metas2030.emisionesNetas.actual,
+  };
+
+  // Recalcular progreso basado en datos reales
+  const calcProgreso = (actual: number, base: number, meta: number, invertir = false) => {
+    if (invertir) {
+      // Para indicadores donde menor es mejor (emisiones, factor clinker, eficiencia)
+      if (base === meta) return 100;
+      return Math.round(Math.min(100, Math.max(0, ((base - actual) / (base - meta)) * 100)));
+    }
+    // Para indicadores donde mayor es mejor (coprocesamiento, biomasa)
+    if (meta === base) return 100;
+    return Math.round(Math.min(100, Math.max(0, ((actual - base) / (meta - base)) * 100)));
+  };
+
   // Datos para el gráfico de compromisos
   const datosCompromisos = accionesCompromisos2030.map((c) => ({
     area: c.area,
@@ -260,39 +323,44 @@ export default function Trayectoria2030Page() {
                 </p>
                 <div className="mt-4 flex items-center gap-6 text-sm">
                   <div>
-                    <span className="text-white/50">Actual (2023):</span>
-                    <span className="ml-2 font-semibold">507 kgCO₂/t</span>
+                    <span className="text-white/50">Actual ({ultimo?.anio ?? 2023}):</span>
+                    <span className="ml-2 font-semibold">{kpiActual.emisiones} kgCO₂/t</span>
                   </div>
                   <div>
                     <span className="text-white/50">Brecha:</span>
-                    <span className="ml-2 font-semibold text-emerald-300">-7 kgCO₂/t</span>
+                    <span className="ml-2 font-semibold text-emerald-300">{kpiActual.emisiones - 500 <= 0 ? kpiActual.emisiones - 500 : `+${kpiActual.emisiones - 500}`} kgCO₂/t</span>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <div className="relative w-32 h-32">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="rgba(255,255,255,0.2)"
-                      strokeWidth="12"
-                      fill="none"
-                    />
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="#10B981"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={`${(93 / 100) * 351.86} 351.86`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  {(() => {
+                    const progEmisiones = calcProgreso(kpiActual.emisiones, 612, 500, true);
+                    return (
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="56"
+                          stroke="rgba(255,255,255,0.2)"
+                          strokeWidth="12"
+                          fill="none"
+                        />
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="56"
+                          stroke="#10B981"
+                          strokeWidth="12"
+                          fill="none"
+                          strokeDasharray={`${(progEmisiones / 100) * 351.86} 351.86`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    );
+                  })()}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold">93%</span>
+                    <span className="text-3xl font-bold">{calcProgreso(kpiActual.emisiones, 612, 500, true)}%</span>
                     <span className="text-xs text-white/70">completado</span>
                   </div>
                 </div>
@@ -308,37 +376,37 @@ export default function Trayectoria2030Page() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <KPICard
                 label="Factor Clínker"
-                actual={metas2030.factorClinker.actual}
+                actual={kpiActual.factorClinker}
                 meta={metas2030.factorClinker.valor}
                 unidad="%"
-                progreso={metas2030.factorClinker.progreso}
+                progreso={calcProgreso(kpiActual.factorClinker, 75, 65, true)}
                 icon={Factory}
                 color="#5B9BD5"
               />
               <KPICard
                 label="Coprocesamiento"
-                actual={metas2030.coprocesamiento.actual}
+                actual={kpiActual.coprocesamiento}
                 meta={metas2030.coprocesamiento.valor}
                 unidad="%"
-                progreso={metas2030.coprocesamiento.progreso}
+                progreso={calcProgreso(kpiActual.coprocesamiento, 0, 10)}
                 icon={Recycle}
                 color="#10B981"
               />
               <KPICard
                 label="Biomasa"
-                actual={metas2030.biomasa.actual}
+                actual={kpiActual.biomasa}
                 meta={metas2030.biomasa.valor}
                 unidad="%"
-                progreso={metas2030.biomasa.progreso}
+                progreso={calcProgreso(kpiActual.biomasa, 0, 5)}
                 icon={Leaf}
                 color="#22C55E"
               />
               <KPICard
                 label="Eficiencia Térmica"
-                actual={metas2030.eficienciaTermica.actual}
+                actual={kpiActual.eficienciaTermica}
                 meta={metas2030.eficienciaTermica.valor}
                 unidad="MJ/tCk"
-                progreso={metas2030.eficienciaTermica.progreso}
+                progreso={calcProgreso(kpiActual.eficienciaTermica, 3622, 3400, true)}
                 icon={Flame}
                 color="#F59E0B"
               />
@@ -352,7 +420,7 @@ export default function Trayectoria2030Page() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <TrayectoriaChart
-                data={trayectoriaEmisiones2030}
+                data={trayEmisiones}
                 titulo="Emisiones Netas"
                 unidad="kgCO₂/t"
                 color="#EF4444"
@@ -361,7 +429,7 @@ export default function Trayectoria2030Page() {
                 invertir={true}
               />
               <TrayectoriaChart
-                data={trayectoriaFactorClinker2030}
+                data={trayFactorClinker}
                 titulo="Factor Clínker"
                 unidad="%"
                 color="#5B9BD5"
@@ -370,7 +438,7 @@ export default function Trayectoria2030Page() {
                 invertir={true}
               />
               <TrayectoriaChart
-                data={trayectoriaCoprocesamiento2030}
+                data={trayCoprocesamiento}
                 titulo="Coprocesamiento"
                 unidad="%"
                 color="#10B981"
@@ -378,7 +446,7 @@ export default function Trayectoria2030Page() {
                 domainMax={11}
               />
               <TrayectoriaChart
-                data={trayectoriaBiomasa2030}
+                data={trayBiomasa}
                 titulo="Biomasa"
                 unidad="%"
                 color="#22C55E"
@@ -397,7 +465,7 @@ export default function Trayectoria2030Page() {
               </p>
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trayectoriaEficienciaTermica2030} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <LineChart data={trayEficiencia} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis dataKey="año" tick={{ fontSize: 10 }} />
                     <YAxis domain={[3390, 3430]} tick={{ fontSize: 10 }} reversed={true} />
@@ -656,7 +724,7 @@ export default function Trayectoria2030Page() {
             <p className="text-sm text-white/80">
               Las metas al 2030 son <strong>condicionadas</strong> a la implementación de marcos regulatorios
               favorables, financiamiento accesible y desarrollo de cadenas de suministro de materiales
-              alternativos. La industria argentina parte con ventaja: las emisiones actuales (507 kgCO₂/tcem)
+              alternativos. La industria argentina parte con ventaja: las emisiones actuales ({kpiActual.emisiones} kgCO₂/tcem)
               ya están cerca de la meta y son significativamente menores que los promedios regional y global.
             </p>
             <div className="mt-4 flex flex-wrap gap-4 text-xs">
