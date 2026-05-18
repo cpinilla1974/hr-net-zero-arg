@@ -1,71 +1,88 @@
-# Metodología de Trabajo - HR-ARG (Net Zero Argentina 2050)
+# HR-ARG (Net Zero Argentina 2050)
 
-## Iniciar la Aplicación
+**Estado: PAUSADO**
 
-Cuando el usuario diga "**inicia la aplicación**" o similar:
+## Arranque
 
-1. Verificar que el servidor de desarrollo no esté ya corriendo
-2. Navegar a la carpeta `app/`
-3. Ejecutar `npm run dev` en segundo plano
-4. Confirmar la URL de acceso (generalmente http://localhost:3000)
+- Carpeta: `app/`
+- Comando: `npm run dev` (Next.js 16, App Router, TypeScript, Tailwind v4)
+- URL: http://localhost:3000
 
----
+## Particularidades
 
-## Stack Tecnológico
+- Sin backend propio ni BD: datos estaticos en `app/src/lib/`.
+- Logos institucionales en `app/public/logos/`.
+- Documentacion de diseno: `docs/brief/`.
+- Archivos fuente pesados (PDF, imagenes generadas, mockups) estan gitignored en `docs/source/` y `docs/design/mockups*/`.
 
-- **Framework**: Next.js 16 (App Router)
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS v4
-- **Gráficos**: Recharts
-- **Iconos**: Lucide React
+<!-- GESTION:START -->
+## Metodologia de trabajo
 
----
+### Idioma
+- Espanol neutro o chileno. NUNCA acento argentino: no usar "vos", "tenes", "queres", "fijate", "dale", "avisame", "haceme", "arranca".
+- Aplica sin excepciones, en codigo, comentarios, commits y comunicacion.
 
-## Estructura del Proyecto
+### Autorizacion explicita
+- NUNCA ejecutar acciones sin autorizacion explicita del usuario.
+- Diagnosticar y proponer; esperar el "hazlo" antes de implementar.
+- Si el usuario pregunta "por que falla" o "cual es la solucion", responder la pregunta sin tocar codigo.
+- Comandos git destructivos (`reset`, `checkout` de archivos, `restore`, `revert`, `clean`, `stash drop`) requieren autorizacion aunque parezcan menores. Solo `status`, `log`, `diff`, `show`, `branch` son libres.
+- Commits y push: solo cuando el usuario los pide. NUNCA `Co-Authored-By` ni "Generated with Claude Code".
 
-```
-hr-arg/
-├── app/                    # Aplicación Next.js
-│   ├── public/logos/       # Logos institucionales
-│   └── src/
-│       ├── app/            # Páginas (App Router)
-│       ├── components/     # Componentes React
-│       └── lib/            # Datos y utilidades
-├── docs/
-│   ├── brief/              # Documentación de diseño
-│   ├── sesiones/           # Registro de sesiones de trabajo
-│   └── source/             # Archivos fuente (PDF, imágenes) - gitignored
-└── venv/                   # Entorno virtual Python
-```
+### Honestidad operativa
+Nunca afirmar como hecho lo que es inferencia. Cuatro patrones prohibidos:
+1. **Estado sin verificar**: antes de declarar que un archivo/repo/servicio "es X" o "esta Y", leerlo. Si no se leyo, decir "no lo verifique, supongo X".
+2. **Tarea reportada sin hacer**: al cerrar, listar archivos tocados con ruta. Lo pendiente o a medias, decirlo en el mismo mensaje. Nada de "listo" generico.
+3. **Opinar sobre docs no leidos**: si no se abrio en esta sesion, decir "no lo he leido" antes de opinar. No resumir de memoria como si fuera lectura.
+4. **Resultados inventados**: no decir "corri X", "test pasa", "compila" sin haberlo ejecutado. Si no se corrio, decirlo.
+Ante la duda, sonar incierto. "No se / no verifique" siempre vence a una afirmacion falsa.
 
----
+### Pensar antes de codear
+- Declarar supuestos antes de implementar. Si hay ambiguedad, preguntar, no adivinar.
+- Si hay varias interpretaciones razonables, presentarlas y dejar elegir.
+- Si algo es confuso, detenerse y nombrar la confusion.
+- Evitar preguntas de opcion multiple / menus con alternativas predefinidas (la herramienta AskUserQuestion) como atajo. No tirar opciones que el usuario no sabe que significan ni que efectos tendran. La regla general es plantear las preguntas en texto abierto, como una discusion, sin apurar. Solo es aceptable ofrecer opciones cerradas cuando esas opciones YA se discutieron y se explico en que consiste cada una y cuales son sus implicancias.
 
-## Política de Comunicación
+### Simplicidad y cambios quirurgicos
+- El codigo minimo que resuelve el problema. Nada especulativo: ni features extra, ni abstracciones para un solo uso, ni "flexibilidad" no pedida, ni manejo de errores para escenarios imposibles.
+- Tocar solo lo que el pedido exige. Cada linea cambiada debe trazarse al pedido.
+- NO "mejorar" codigo adyacente, formato ni comentarios. NO refactorizar lo que no esta roto. Respetar el estilo existente aunque sea distinto al que uno elegiria.
+- Si se detecta codigo muerto no relacionado, mencionarlo, no borrarlo.
+- Solo limpiar los huerfanos (imports, variables) que los propios cambios generaron.
 
-- NUNCA usar jerga argentina o regionalismos
-- SIEMPRE usar español neutro profesional
+### Criterios de exito
+- Antes de empezar, nombrar como se va a verificar que quedo bien ("corre el test X", "la pagina carga sin error Y").
+- Criterios debiles ("que funcione") obligan a reabrir; criterios concretos permiten cerrar.
 
-## Política de Commits
+### Sesiones de trabajo
+- `/ultima-sesion` - Lee el archivo de sesion mas reciente del proyecto.
+- `/documentar-sesion` - Documenta el trabajo de la sesion actual.
 
-- NUNCA incluir a Claude como autor del commit
-- NO usar las líneas "🤖 Generated with Claude Code" ni "Co-Authored-By: Claude"
-- Los commits deben aparecer como del usuario únicamente
+### Procedimiento "trabajemos en las tareas"
+Cuando el usuario lo indique:
+1. Buscar archivo de tareas activo en `$HOME/projects/gestion/proyectos/{proyecto}/tareas/` (el mas reciente con pendientes).
+2. Resumir pendientes/hechas e identificar la siguiente.
+3. Por cada tarea: analizar -> proponer -> esperar autorizacion -> ejecutar solo lo autorizado -> informar cambios -> esperar revision del usuario.
+4. Al cerrar: commit si lo pide, cerrar ticket en tickets.db si aplica, actualizar archivo de tareas (Decisiones, Ejecucion, Estado=hecho, Fecha cierre), pasar a la siguiente.
+Una tarea a la vez, en orden, salvo bloqueo justificado.
 
----
+<!-- SEGURIDAD:START -->
+### Seguridad de dependencias (supply chain)
 
-## Sesiones de Trabajo
+Generado desde `config/seguridad/`. Agregar reglas: crear archivo en `config/seguridad/` y correr `python scripts/gen_seguridad_claude.py`.
 
-- `/ultima-sesion` - Leer última sesión documentada
-- `/documentar-sesion` - Documentar trabajo de la sesión actual
+**JavaScript/Node.js:**
+- Antes de `npm install`: verificar `.npmrc` con `ignore-scripts=true`, `save-exact=true`, `package-lock=true`. Si falta, crearlo.
+- NUNCA `npm install` sin lockfile commiteado.
+- Dependencias nuevas con version exacta: `npm install paquete@1.2.3 --save-exact`. Verificar trusted publisher y que la version tenga mas de 24h.
+- Preferir pnpm sobre npm/yarn.
+- Si `package.json` tiene `^` o `~`: alertar como riesgo y proponer fijar al lockfile.
 
----
+**Python:**
+- `==` en requirements.txt, nunca rangos.
+- No instalar desde git URLs en produccion.
+- En CI/CD preferir `pip install -r requirements.txt --require-hashes`.
 
-## Archivos Ignorados (Git)
-
-Los siguientes archivos/carpetas están en `.gitignore` y no se suben al repositorio:
-
-- `*.pdf` - Documentos PDF pesados
-- `docs/source/images/` - Imágenes generadas del PDF
-- `docs/source/*.py` - Scripts de procesamiento
-- `docs/design/mockups*/` - Mockups de diseño
-- `venv/` - Entorno virtual Python
+Auditoria: `python scripts/security_audit.py`.
+<!-- SEGURIDAD:END -->
+<!-- GESTION:END -->
